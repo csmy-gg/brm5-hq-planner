@@ -33,7 +33,16 @@ These are the provider's documented setup steps. [Supabase Discord guide](https:
 ## 3. Enable Google
 
 1. Open [Google Cloud Console](https://console.cloud.google.com/) and create/select a project for **BRM5 HQ Planner**.
-2. Open **Google Auth Platform**. Complete **Branding** using the app name, your support email and developer contact details.
+2. Open **Google Auth Platform → Branding** and save the following values. For the support-email dropdown, use a Google account that manages the support Google Group. Set developer contact details to an address you monitor for Google's notices.
+
+   | Branding field | Value |
+   | --- | --- |
+   | App name | `BRM5 HQ Planner` |
+   | User support email | `brm5hqplanner@googlegroups.com` |
+   | Application home page | `https://brm5-hq-planner.vercel.app` |
+   | Application privacy policy | `https://brm5-hq-planner.vercel.app/privacy.html` |
+
+   The homepage links to the public privacy policy and support contact. If **Publish app** is disabled, finish and save the required Branding fields first. Google may separately request domain ownership or branding verification; follow the validation shown in the console. [Google Branding requirements](https://support.google.com/cloud/answer/15549049?hl=en)
 3. In **Audience**, choose **External**. Start in **Testing** and add your Google email as a test user.
 4. In **Data Access**, select `openid`, `.../auth/userinfo.email` and `.../auth/userinfo.profile`.
 5. Under **Clients**, create an OAuth client with application type **Web application**.
