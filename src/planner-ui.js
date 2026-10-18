@@ -73,7 +73,7 @@ export function createPlannerUI({getState,persistence,commit,adopt,onPreferences
   $('#confirm-reset').onclick=async()=>{const button=$('#confirm-reset');if(button.disabled)return;button.disabled=true;resetting=true;$('#cancel-reset').disabled=true;$('#reset-backup').disabled=true;$('#reset-error').textContent='Resetting your HQ. Please wait for confirmation…';try{const empty=await persistence.resetProfile();clearDrafts();adopt(empty);resetDialog.close();drawer.close();$('#setup-guide').open=true;location.hash='#guide';notify('HQ reset to the empty template. Setup is ready.');}catch(error){$('#reset-error').textContent=error.message;}finally{button.disabled=false;resetting=false;$('#cancel-reset').disabled=false;$('#reset-backup').disabled=false;syncStatus();}};
   resetDialog.addEventListener('close',()=>$('#reset-hq').focus());
   document.querySelectorAll('[data-open-settings]').forEach(button=>button.onclick=()=>open(0,button));
-  document.addEventListener('click',event=>{const link=event.target.closest('a[href="#settings"]');if(link){event.preventDefault();open(3,link);}});
+  document.addEventListener('click',event=>{const link=event.target.closest('a[href="#settings"]');if(link){event.preventDefault();open(Number(link.dataset.settingsSection??3),link);}});
   window.addEventListener('hashchange',()=>{if(location.hash==='#settings')open(3);});if(location.hash==='#settings')queueMicrotask(()=>open(3));
   window.addEventListener('storage',event=>{if(event.key===PREFERENCES_KEY&&!drawer.open){preferences=readPreferences();apply(preferences);}});
   apply(preferences);
