@@ -108,6 +108,7 @@ function render(){
   $('#timeline').innerHTML='<p class="notice">Finish the setup guide to generate your first session plan.</p>';
  }
  $$('[data-finish-session]').forEach(b=>b.disabled=Boolean(f.needsSetup));
+ $('#guide').dataset.setupComplete=String(state.setupComplete);
  $('#setup-progress').textContent=state.setupComplete?'Setup complete. You can change your HQ details at any time.':'Your HQ starts empty. Save your details below, then finish setup.';
  $('#finish-setup').textContent=state.setupComplete?'Update setup & rebuild plan':'Finish setup & create my plan';
  updateVisitCountdowns();
