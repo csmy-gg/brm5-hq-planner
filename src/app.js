@@ -50,7 +50,7 @@ function commit(next,message){
 function act(fn,msg){try{return commit(fn(),msg);}catch(e){if(submittingForm)dirtyForms.add(submittingForm);toast(e.message,true);}}
 function input(id){const raw=$('#'+id).value,n=Number(raw);if(raw.trim()===''||!Number.isFinite(n)||n<0)throw Error('Enter a valid nonnegative number.');return n;}
 function resourceText(res){return res.map((n,i)=>n?`${num(n)} ${['CM','PM','Fuel','E'][i]}`:'').filter(Boolean).join(' · ')||'No resources';}
-function openFinishReview(scheduled,trigger){try{workspace.open(scheduled,trigger);}catch(error){toast(error.message);}}
+function openFinishReview(scheduled,trigger){try{workspace.open(scheduled,trigger);}catch(error){toast(error.message,true);}}
 function updateVisitCountdowns(){
  const now=Date.now();$$('[data-visit-time]').forEach(el=>{const end=Number(el.dataset.visitTime);if(!el.dataset.visitTime){el.textContent='Complete setup to create a visit';return;}const difference=end-now;if(difference<=0){el.textContent=el.hasAttribute('data-reference-visit')&&difference<0?'Visit time passed':el.hasAttribute('data-current-session')?'Due now · awaiting confirmation':'Due now';return;}const total=Math.ceil(difference/60000),days=Math.floor(total/1440),hours=Math.floor(total%1440/60),minutes=total%60;el.textContent='In '+(days?days+'d ':'')+(hours||days?hours+'h ':'')+minutes+'m';});
 }
@@ -205,7 +205,7 @@ $('#guide-import').onclick=()=>$('#import').click();
 
 $('#finish-setup').onclick=()=>{const result=act(()=>{const n=clone(state);if(n.power<=0||metrics(n,DATA.wiki).capacity<=0||nextVisit(n)===null)throw Error('Save your research power, storage and first visit in Planning settings before finishing setup.');n.setupComplete=true;return n;},'Setup complete. Your first session is ready.');if(result){guide.open=false;location.hash='#today';}};
 accountUI=createAccountUI({persistence,getState:()=>state,toast});accountUI.render();
-persistence.init().catch(error=>toast(error.message));
+persistence.init().catch(error=>toast(error.message,true));
 window.addEventListener('online',()=>persistence.refresh());
 window.addEventListener('focus',()=>persistence.refresh());
 setInterval(()=>{if(!document.hidden)persistence.refresh();},30000);

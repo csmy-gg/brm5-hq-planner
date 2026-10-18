@@ -6,7 +6,7 @@ export function downloadJSON(data,name='brm5-hq-recovery'){
 export function createAccountUI({persistence:p,getState,toast}){
  const dialog=$('#account-dialog'),offerRecovery=createRecoveryPrompt($('#recovery-dialog'),downloadJSON);let openedChoice=null;
  const summary=(label,profile)=>{const article=document.createElement('article'),h=document.createElement('h3'),text=document.createElement('p');h.textContent=label;text.textContent=profile?'$'+Math.round(profile.cash).toLocaleString()+' · '+Object.values(profile.status).filter(x=>x.state==='done').length+' research completed · '+profile.ships.length+' deliveries':'No saved HQ yet';article.append(h,text);return article;};
- const run=fn=>async()=>{try{await fn();render();}catch(error){toast(error.message);}};
+ const run=fn=>async()=>{try{await fn();render();}catch(error){toast(error.message,true);}};
  function review(){
   const c=p.choice;if(!c)return;openedChoice=c;$('#account-dialog-title').textContent=c.kind==='conflict'?'Progress changed on another device':'Choose your account HQ';
   $('#account-dialog-description').textContent=c.kind==='conflict'?'Both copies are preserved. Choose the one you want to continue with. Cash and actions will not be combined.':'Choose an existing HQ or start an empty one. Your guest save stays separate.';
