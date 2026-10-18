@@ -53,3 +53,6 @@ body{font-size:.9375rem;line-height:1.65}p,li,label,h1,h2,h3,h4,a,button{overflo
 :root[data-ui-mode=easy] #guide[data-setup-complete=true]:has(#setup-guide:not([open])){display:none}
 
 .workspace-tools .import{justify-content:center;text-align:center}
+
+.topbar{row-gap:.25rem}.topbar .header-tagline{grid-column:1/-1;min-width:0;width:100%;margin:0;overflow-x:auto;white-space:nowrap;scrollbar-width:thin}.header-tagline:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+@media(max-width:850px){.topbar .header-tagline{grid-row:2}.topbar .date-box{grid-row:3;margin-top:.75rem}}
