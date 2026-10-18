@@ -22,5 +22,5 @@ export function createSetupResearch({getState,commit,data}){
   }catch(error){message.textContent=error.message;}
  };
  load();
- return {sync(){if(!dirty)load();},reset(){load();message.textContent='';}};
+ return {get hasDrafts(){return dirty;},sync(){if(!dirty)load();},reset(){load();message.textContent='';}};
 }

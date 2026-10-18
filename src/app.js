@@ -17,7 +17,7 @@ let state=normalizeDeliveries(defaults(DATA.tasks),DATA.wiki),filter='all',full=
 let accountUI,plannerUI,lastIdentity=null,researchView=readPreferences(),deferredState=null,previousResearchLayout=null;
 filter=researchView.filter;
 const dirtyForms=new Set();let submittingForm=null,dispatchToken=crypto.randomUUID();
-function hasDrafts(){return dirtyForms.size>0||Boolean(document.querySelector('.research-timer-editor:not([hidden]),.delivery-timer-editor:not([hidden])'))||workspace?.hasDrafts;}
+function hasDrafts(){return dirtyForms.size>0||Boolean(document.querySelector('.research-timer-editor:not([hidden]),.delivery-timer-editor:not([hidden])'))||workspace?.hasDrafts||setupResearch?.hasDrafts;}
 function editing(){return hasDrafts()||plannerUI?.editing||Boolean(document.querySelector('dialog[open]'));}
 function captureDrafts(){return [...dirtyForms].map(id=>{const form=document.getElementById(id);return form?{id,hidden:form.hidden,fields:[...form.elements].map(el=>({id:el.id,value:el.value,checked:el.checked,tag:el.tagName}))}:null;}).filter(Boolean);}
 function restoreDrafts(drafts){for(const draft of drafts){const form=document.getElementById(draft.id);if(!form)continue;form.hidden=draft.hidden;draft.fields.forEach((entry,i)=>{const el=entry.id?document.getElementById(entry.id):form.elements[i];if(el&&el.tagName===entry.tag){el.value=entry.value;if(el.type==='checkbox')el.checked=entry.checked;}});}}
@@ -47,7 +47,7 @@ function commit(next,message){
  try{persistence.save(candidate);}catch(error){storageOk=false;throw Error(error.message||'The browser could not save this action. Your recorded progress is unchanged.');}
  state=candidate;deferredState=null;$('#remote-update').hidden=true;storageOk=true;render();if(message)toast(message);return {persisted:true};
 }
-function act(fn,msg){try{commit(fn(),msg);}catch(e){if(submittingForm)dirtyForms.add(submittingForm);toast(e.message,true);}}
+function act(fn,msg){try{return commit(fn(),msg);}catch(e){if(submittingForm)dirtyForms.add(submittingForm);toast(e.message,true);}}
 function input(id){const raw=$('#'+id).value,n=Number(raw);if(raw.trim()===''||!Number.isFinite(n)||n<0)throw Error('Enter a valid nonnegative number.');return n;}
 function resourceText(res){return res.map((n,i)=>n?`${num(n)} ${['CM','PM','Fuel','E'][i]}`:'').filter(Boolean).join(' · ')||'No resources';}
 function openFinishReview(scheduled,trigger){try{workspace.open(scheduled,trigger);}catch(error){toast(error.message);}}
@@ -180,7 +180,7 @@ document.querySelectorAll('nav a').forEach(a=>a.onclick=()=>{$$('nav a').forEach
 plannerUI=createPlannerUI({getState:()=>state,persistence,commit,adopt:next=>{state=next;deferredState=null;$('#remote-update').hidden=true;setupResearch.reset();render();},notify:toast,hasDrafts,clearDrafts:id=>{if(id)dirtyForms.delete(id);else dirtyForms.clear();},onPreferences:value=>{researchView={...value};filter=value.filter;$('#search').value=value.search;$('#research-source').value=value.branch;$('#research-layout').value=value.layout;renderResearch(tasksFor(state,DATA));}});
 setInterval(()=>{if(!editing()&&!['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))render();else updateTimers();},60000);
 $('#persistent-error button').onclick=()=>$('#persistent-error').hidden=true;
-function reviewLatest(){if(!deferredState)return;try{const raw=persistence.readRaw(),next=raw?validate(JSON.parse(raw)):deferredState;dirtyForms.clear();$$('fieldset.research-timer-editor,fieldset.delivery-timer-editor').forEach(el=>el.hidden=true);plannerUI.existingAccount(next);state=next;deferredState=null;$('#remote-update').hidden=true;render();}catch(error){toast(error.message,true);}}
+function reviewLatest(){if(!deferredState)return;try{const raw=persistence.readRaw(),next=raw?validate(JSON.parse(raw)):deferredState;dirtyForms.clear();$$('fieldset.research-timer-editor,fieldset.delivery-timer-editor').forEach(el=>el.hidden=true);plannerUI.existingAccount(next);state=next;setupResearch.reset();deferredState=null;$('#remote-update').hidden=true;render();}catch(error){toast(error.message,true);}}
 $('#review-remote').onclick=()=>{if(hasDrafts()){$('#review-edits-dialog').showModal();$('#cancel-review-edits').focus();return;}reviewLatest();};
 $('#cancel-review-edits').onclick=()=>$('#review-edits-dialog').close();$('#discard-review-edits').onclick=()=>{$('#review-edits-dialog').close();reviewLatest();};
 render();
@@ -194,7 +194,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)updateTime
 
 // Keep guide preferences separate from HQ progress and backups.
 const guide=$('#setup-guide'),guideKey='brm5-public-guide-open';let guidePreference=null;
-try{guidePreference=localStorage.getItem(guideKey);guide.open=guidePreference===null?!state.setupComplete:guidePreference==='true';}catch{guide.open=true;}
+try{guidePreference=localStorage.getItem(guideKey);guide.open=location.hash==='#guide'||(!state.setupComplete&&guidePreference!=='false');}catch{guide.open=true;}
 guide.addEventListener('toggle',()=>{try{localStorage.setItem(guideKey,String(guide.open));}catch{}});
 $('#guide-close').onclick=()=>{guide.open=false;guide.querySelector('summary').focus();};
 document.querySelector('nav a[href="#guide"]').addEventListener('click',()=>{guide.open=true;});
@@ -203,7 +203,7 @@ if(location.hash==='#guide'&&guidePreference!=='false')guide.open=true;
 $('#guide-export').onclick=()=>$('#export').click();
 $('#guide-import').onclick=()=>$('#import').click();
 
-$('#finish-setup').onclick=()=>act(()=>{const n=clone(state);if(n.power<=0||metrics(n,DATA.wiki).capacity<=0||nextVisit(n)===null)throw Error('Save your research power, storage and first visit in Planning settings before finishing setup.');n.setupComplete=true;return n;},'Setup complete. Your first session is ready.');
+$('#finish-setup').onclick=()=>{const result=act(()=>{const n=clone(state);if(n.power<=0||metrics(n,DATA.wiki).capacity<=0||nextVisit(n)===null)throw Error('Save your research power, storage and first visit in Planning settings before finishing setup.');n.setupComplete=true;return n;},'Setup complete. Your first session is ready.');if(result){guide.open=false;location.hash='#today';}};
 accountUI=createAccountUI({persistence,getState:()=>state,toast});accountUI.render();
 persistence.init().catch(error=>toast(error.message));
 window.addEventListener('online',()=>persistence.refresh());
