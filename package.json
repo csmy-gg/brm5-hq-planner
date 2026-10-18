@@ -14,7 +14,8 @@
     "test:database": "node --test tests/database.integration.mjs"
   },
   "dependencies": {
-    "@supabase/supabase-js": "2.118.0"
+    "@supabase/supabase-js": "2.118.0",
+    "@vercel/analytics": "2.0.1"
   },
   "devDependencies": {
     "vite": "7.3.7"

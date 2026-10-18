@@ -30,6 +30,7 @@
       <li><strong>Sign-in information:</strong> if you choose Google or Discord sign-in, Supabase Authentication processes your provider identifier, email address and basic profile information made available by that provider, which may include your display name and profile image. It also manages the session information needed to keep you signed in.</li>
       <li><strong>Browser storage:</strong> the planner stores your guest HQ, account-specific device copies, pending saves, recovery copies, appearance and guide preferences, and sign-in session information in your browser.</li>
       <li><strong>Technical requests:</strong> the hosting and database providers process network information such as IP addresses, request details and browser information to deliver and operate the service.</li>
+      <li><strong>Website analytics:</strong> Vercel Web Analytics collects aggregate planner page-view and visitor statistics, including referral sources, approximate location, browser, operating system and device type. It uses a request-derived visitor hash that is discarded after 24 hours, without analytics cookies. Our integration removes query strings and URL fragments and excludes sign-in callback pages, preview deployments and local development. It does not send HQ profiles, balances, staff, research selections, email addresses or account identifiers as analytics properties.</li>
       <li><strong>Support correspondence:</strong> if you email support, the operator receives the email address and message information you send.</li>
     </ul>
     <p>Google sign-in uses basic identity scopes: <code>openid</code>, email and profile. The planner does not request access to your Gmail messages, Google Drive files or Google Contacts. Your Google or Discord password is entered with that provider; it is not entered into or stored by the planner.</p>
@@ -38,12 +39,12 @@
   <section aria-labelledby="purposes">
     <h2 id="purposes">How information is used</h2>
     <p>Information is used to calculate your session plan, remember your progress and preferences, authenticate your account, synchronize your HQ between devices, recover conflicting saves, operate the service and respond to support requests.</p>
-    <p>Information received through Google sign-in is used for authentication and the account-save features. The planner does not use it for advertising, sell it, or use it to train AI models. The planner does not add advertising or analytics trackers.</p>
+    <p>Information received through Google sign-in is used for authentication and the account-save features. The planner does not use it for advertising, sell it, or use it to train AI models. Aggregate website analytics help the operator understand traffic and device usage; the planner does not add advertising trackers or record screen activity.</p>
   </section>
 
   <section aria-labelledby="providers">
     <h2 id="providers">Services involved</h2>
-    <p><strong>Vercel</strong> hosts the website. <strong>Supabase</strong> provides authentication and the database that holds account saves. <strong>Google or Discord</strong> handles the sign-in you select. The public support address uses <strong>Google Groups</strong>. Those services process information needed to provide their respective functions.</p>
+    <p><strong>Vercel</strong> hosts the website and processes website analytics. <strong>Supabase</strong> provides authentication and the database that holds account saves. <strong>Google or Discord</strong> handles the sign-in you select. The public support address uses <strong>Google Groups</strong>. Those services process information needed to provide their respective functions. Read <a href="https://vercel.com/docs/analytics/privacy-policy" rel="noreferrer">Vercel's Web Analytics privacy explanation</a> for its analytics data practices.</p>
     <p>Account HQ profiles are not publicly listed. Database access rules restrict player access to their own account's profile. The operator can administer the service and its database, including when responding to support or deletion requests.</p>
     <p>Provider policies: <a href="https://vercel.com/legal/privacy-policy" rel="noreferrer">Vercel privacy policy</a> and <a href="https://supabase.com/privacy" rel="noreferrer">Supabase privacy policy</a>. Infrastructure and service providers may process information in different countries; this website does not promise that all processing remains in one country.</p>
   </section>
