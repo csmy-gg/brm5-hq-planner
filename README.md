@@ -4,7 +4,7 @@ A public-ready, manual HQ tracker with a 96-item research catalogue, session che
 
 ## Run locally
 
-Use Node 22.12+ or Node 24. Run `npm ci`, then `npm run dev`. `npm test` runs the planner and persistence checks. `npm run build` creates deployable `dist/`; source lives in `src/`. `npm run preview` serves a built version.
+Use Node 24. Run `npm ci`, then `npm run dev`. `npm test` runs the planner and persistence checks. `npm run build` creates deployable `dist/`; source lives in `src/`. `npm run preview` serves a built version.
 
 Without Supabase configuration the full planner works as a guest. New profiles have no research, money, resources, staff, timers, deliveries or session history. The setup guide asks players to enter real values. Only the suggested 12-hour visit interval and 90% uptime estimate start with nonzero values.
 

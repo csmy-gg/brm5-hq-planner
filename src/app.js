@@ -10,7 +10,13 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],mon
 const date=(t,short=false)=>t==null?'Set up your first visit':new Intl.DateTimeFormat('en-GB',{timeZone:state.timezone,weekday:short?undefined:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZoneName:'short'}).format(new Date(t));
 let state=normalizeDeliveries(defaults(DATA.tasks),DATA.wiki),filter='all',full=false,toastTimer,storageOk=true;
 let accountUI,lastIdentity=null;
-const persistence=createPersistence({validate,empty:()=>defaults(DATA.tasks),onChange:next=>{state=next;const identity=persistence.user?.id??null;if(identity!==lastIdentity){lastIdentity=identity;setupResearch.reset();}document.querySelector('#finish-session-dialog')?.close();render();},onStatus:()=>{accountUI?.render();}});
+const persistence=createPersistence({validate,empty:()=>defaults(DATA.tasks),onChange:next=>{
+ const identity=persistence.user?.id??null,switching=identity!==lastIdentity;
+ if(!switching&&(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName)||document.querySelector('#finish-session-dialog')?.open)){
+  toast('Account progress changed elsewhere. Review the latest saved values before saving these edits.');return;
+ }
+ state=next;if(switching){lastIdentity=identity;setupResearch.reset();}document.querySelector('#finish-session-dialog')?.close();render();
+},onStatus:()=>{accountUI?.render();}});
 try{state=persistence.load();}catch{storageOk=false;}
 function toast(message){$('#toast').textContent=message;$('#toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').hidden=true,6500);}
 function describeAction(next,message){

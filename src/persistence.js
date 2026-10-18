@@ -88,7 +88,8 @@ export function createPersistence({validate,empty,onChange=()=>{},onStatus=()=>{
   async signIn(provider){if(!providers.includes(provider))throw Error('This sign-in provider is not enabled yet. Guest tracking and backups are available.');const {error}=await client.auth.signInWithOAuth({provider,options:{redirectTo:location.origin+'/auth/callback'}});if(error)throw error;},
   async signOut(){
    if(running)throw Error('A save is still in progress. Wait for it to finish, then sign out.');
-   if(envelope.dirty||choice)recover(choice?.remote,envelope.profile);
+   // The durable account draft already exists. A full recovery quota must not prevent sign-out.
+   if(envelope.dirty||choice){try{recover(choice?.remote,envelope.profile);}catch{}}
    const {error}=await client.auth.signOut({scope:'local'});if(error)throw Error('Could not sign out. Reconnect and try again.');await switchUser(null);
   },
   async resolve(which){
