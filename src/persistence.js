@@ -1,4 +1,5 @@
 import {createClient} from '@supabase/supabase-js';
+import {saveSignature} from './save-state.js';
 
 const copy=value=>JSON.parse(JSON.stringify(value));
 const token=()=>globalThis.crypto.randomUUID();
@@ -12,8 +13,9 @@ export function createPersistence({validate,empty,onChange=()=>{},onStatus=()=>{
  function read(k=activeKey()){const raw=storage.getItem(k);if(!raw)return null;const e=JSON.parse(raw);if(e?.format!==1||!Number.isInteger(e.baseRevision)||e.baseRevision<0||typeof e.dirty!=='boolean'||typeof e.mutationId!=='string')throw Error('Saved HQ could not be read. Export or restore a backup before continuing.');e.profile=validate(e.profile);return e;}
  function persist(e){storage.setItem(activeKey(),JSON.stringify(e));envelope=e;}
  function fresh(profile=empty()){return {format:1,profile:validate(profile),baseRevision:0,dirty:false,mutationId:token()};}
- function notify(){onChange(copy(envelope.profile));listeners();}
+ function notify(reason='remote'){onChange(copy(envelope.profile),{reason});listeners();}
  function changedGuest(){const e=read(guestKey);return e&&(e.profile.setupComplete||e.profile.history?.length||e.profile.cash||e.profile.res.some(Boolean)||Object.values(e.profile.status).some(x=>x.state!=='todo')||Object.values(e.profile.staff).some(a=>Object.values(a).some(Boolean)))?e:null;}
+ function guestDecision(){const guest=changedGuest()?.profile;return guest?(typeof guest.revision==='string'&&guest.revision?guest.revision:saveSignature(guest)):null;}
  function setChoice(kind,remote){choice={kind,remote,local:copy(envelope.profile),guest:changedGuest()?.profile||null};listeners();}
  function recover(remote,local){
   const backup={exportedAt:new Date().toISOString(),account: user?.id,cloud:remote?.profile??null,device:copy(local)};
@@ -21,7 +23,7 @@ export function createPersistence({validate,empty,onChange=()=>{},onStatus=()=>{
   const previous=JSON.parse(storage.getItem(recoveryKey)||'[]');storage.setItem(recoveryKey,JSON.stringify([...previous,backup].slice(-3)));return backup;
  }
  async function fetchRow(){const {data,error}=await client.from('hq_profiles').select('profile,revision,updated_at,last_mutation_id').eq('user_id',user.id).maybeSingle();if(error)throw error;return data?{...data,profile:validate(data.profile)}:null;}
- function accept(remote){persist({...fresh(remote.profile),baseRevision:remote.revision});choice=null;problem='';notify();}
+ function accept(remote,reason='remote',decision=envelope.guestDecision){persist({...fresh(remote.profile),baseRevision:remote.revision,guestDecision:decision});choice=null;problem='';notify(reason);}
  async function refresh(){
   if(!user||!client||busy||choice)return;
   if(envelope.dirty)return flush();
@@ -57,7 +59,7 @@ export function createPersistence({validate,empty,onChange=()=>{},onStatus=()=>{
    if(envelope.dirty){
     if(remote?.last_mutation_id===envelope.mutationId)accept(remote);
     else if((remote?.revision||0)!==envelope.baseRevision)setChoice('conflict',remote);
-   }else if(remote){if(changedGuest())setChoice('import',remote);else accept(remote);}
+   }else if(remote){const decision=guestDecision(),assessed=Object.hasOwn(envelope,'guestDecision'),knownAccount=envelope.baseRevision>0;if(decision!==null&&(!knownAccount||(assessed&&envelope.guestDecision!==decision)))setChoice('import',remote);else accept(remote,'load',assessed?envelope.guestDecision:decision);}
    else setChoice('new',null);
   }catch{problem='Could not load your account save. Reconnect before editing to keep both copies safe.';}
   finally{if(epoch===generation){busy=false;listeners();if(!choice&&!problem)flush();}}
@@ -104,7 +106,7 @@ export function createPersistence({validate,empty,onChange=()=>{},onStatus=()=>{
     if(user&&(remote?.revision||0)!==envelope.baseRevision){setChoice('conflict',remote);throw Error('Account progress changed elsewhere. Review both saves before resetting.');}
     recover(remote,envelope.profile);
     const profile=validate({...empty(),revision:token()});
-    persist({...fresh(profile),baseRevision:envelope.baseRevision,dirty:Boolean(user)});problem='';
+    persist({...fresh(profile),baseRevision:envelope.baseRevision,dirty:Boolean(user),guestDecision:envelope.guestDecision});problem='';
    }finally{if(epoch===generation){busy=false;listeners();}}
    notify();if(user)await flush();
    if(epoch!==generation)throw Error('The active account changed while resetting.');
@@ -117,8 +119,9 @@ export function createPersistence({validate,empty,onChange=()=>{},onStatus=()=>{
    const c=choice,local=which==='guest'?c.guest:which==='empty'?empty():envelope.profile;
    if(which==='cloud'&&!c.remote||which==='guest'&&!c.guest)throw Error('That save is not available.');
    const backup=recover(c.remote,local); // Storage must succeed before replacing either copy.
-   if(which==='cloud')accept(c.remote);
-   else{persist({format:1,profile:validate(local),baseRevision:c.remote?.revision||0,dirty:true,mutationId:token()});choice=null;problem='';notify();await flush();}
+   const decision=guestDecision();
+   if(which==='cloud')accept(c.remote,'resolved',decision);
+   else{persist({format:1,profile:validate(local),baseRevision:c.remote?.revision||0,dirty:true,mutationId:token(),guestDecision:decision});choice=null;problem='';notify('resolved');await flush();}
    return backup;
   },refresh,flush
  };

@@ -1,3 +1,4 @@
+import {incomingSaveAction} from './save-state.js';
 import {createPlannerUI} from './planner-ui.js';
 import {readPreferences} from './preferences.js';
 import {visibleResearch,goalProgress,productGoals} from './research-view.js';
@@ -24,12 +25,15 @@ function restoreDrafts(drafts){for(const draft of drafts){const form=document.ge
 document.addEventListener('input',event=>{const form=event.target.form||event.target.closest('form');if(form?.id&&!['start-research','sale','guide-research-form'].includes(form.id))dirtyForms.add(form.id);});
 document.addEventListener('change',event=>{const form=event.target.form||event.target.closest('form');if(form?.id&&!['start-research','sale','guide-research-form'].includes(form.id))dirtyForms.add(form.id);});
 document.addEventListener('submit',event=>{submittingForm=event.target.id;dirtyForms.delete(submittingForm);queueMicrotask(()=>submittingForm=null);},true);
-const persistence=createPersistence({validate,empty:()=>defaults(DATA.tasks),onChange:next=>{
+function receiveIncoming(next,context={}){
  const identity=persistence.user?.id??null,switching=identity!==lastIdentity;
- if(!switching&&editing()){deferredState=next;$('#remote-update').hidden=false;return;}
+ const action=incomingSaveAction(state,next,{switching,reason:context.reason,hasDrafts:hasDrafts()||Boolean(plannerUI?.dirty),editing:editing()});
+ if(action==='ignore'){deferredState=null;$('#remote-update').hidden=true;return;}
+ if(action==='defer'){deferredState=next;$('#remote-update').hidden=false;return;}
  if(switching)plannerUI?.identityChanged();plannerUI?.existingAccount(next);
- state=next;if(switching){dirtyForms.clear();deferredState=null;$('#remote-update').hidden=true;lastIdentity=identity;setupResearch.reset();}document.querySelector('#finish-session-dialog')?.close();render();
-},onStatus:()=>{accountUI?.render();plannerUI?.syncStatus();}});
+ state=next;deferredState=null;$('#remote-update').hidden=true;if(switching){dirtyForms.clear();lastIdentity=identity;setupResearch.reset();}document.querySelector('#finish-session-dialog')?.close();render();
+}
+const persistence=createPersistence({validate,empty:()=>defaults(DATA.tasks),onChange:receiveIncoming,onStatus:()=>{accountUI?.render();plannerUI?.syncStatus();}});
 try{state=persistence.load();}catch{storageOk=false;}
 function toast(message,error=false){if(error){$('#persistent-error span').textContent=message;$('#persistent-error').hidden=false;return;}$('#toast').textContent=message;$('#toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').hidden=true,6500);}
 function describeAction(next,message){
@@ -189,7 +193,7 @@ render();
 
 document.addEventListener('submit',e=>{if(e.target.id!=='cash-editor')return;e.preventDefault();act(()=>({...clone(state),cash:input('current-cash')}),'Cash balance updated. Your plan has been rebuilt.');});
 
-window.addEventListener('storage',e=>{if(e.key===persistence.key&&e.newValue){try{const next=persistence.receiveStorage(e.newValue);if(!editing()&&!['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName)){state=next;render();}else{deferredState=next;$('#remote-update').hidden=false;}}catch{}}});
+window.addEventListener('storage',e=>{if(e.key===persistence.key&&e.newValue){try{receiveIncoming(persistence.receiveStorage(e.newValue),{reason:'remote'});}catch{}}});
 
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)updateTimers();});
 

@@ -51,3 +51,5 @@ body{font-size:.9375rem;line-height:1.65}p,li,label,h1,h2,h3,h4,a,button{overflo
 @media(max-width:600px){.cash-balance-footer{flex-wrap:wrap}.cash-balance-footer>small{flex-basis:100%}.cash-balance-footer #edit-cash{margin-left:auto}}
 
 :root[data-ui-mode=easy] #guide[data-setup-complete=true]:has(#setup-guide:not([open])){display:none}
+
+.workspace-tools .import{justify-content:center;text-align:center}
