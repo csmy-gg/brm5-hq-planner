@@ -56,7 +56,7 @@ These are the provider's documented setup steps. [Supabase Discord guide](https:
 
 ## 4. Verify the account saves
 
-1. As a guest, enter sample cash or a completed research item. Sign in and choose **Save guest HQ to account**. Keep the downloaded recovery copy.
+1. As a guest, enter sample cash or a completed research item. Sign in and choose **Save guest HQ to account**. When asked whether to download a recovery file, choose **Yes, download** for a portable backup or **No, continue** to skip the download. A recovery copy is still kept in this browser.
 2. Wait for **Saved to account** before closing the page.
 3. Open the same site on another device and sign in using the same provider/account. Verify the cash and research match.
 4. Sign out. The guest HQ should return; the account HQ should disappear from the interface.
