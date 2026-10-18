@@ -1,5 +1,5 @@
 import {createEmptyProfile} from './empty-profile.js';
-import {zonedTimestamp} from './time.js';
+import {zonedTimestamp,validTimestamp} from './time.js';
 export const KEYS=['cm','pm','fuel','equipment'];
 export const LABELS=['Construction Materials','Precious Metals','Fuel','Equipment'];
 export const AREAS=['Operations','Delivery','Logistics','Defense','Infirmary','Training'];
@@ -80,6 +80,8 @@ export function forecast(state,data,now=Date.now(),limit=160){
  if(done())return {rows,finished:true,finish:now,metrics:m};
  for(let k=0;k<limit;k++){
   if(k>0)t=following+(k-1)*s.interval*3600000;
+  // An imported visit can be valid but too close to JavaScript's final supported date.
+  if(!validTimestamp(t)||!validTimestamp(t+Math.max(data.wiki.deliveryHours,...tasks.map(task=>task.hours))*3600000))break;
   const projected=projectStock(s,t,m);s.res=projected.res;s.snapshot=t;
   const ready=s.ships.filter(x=>x.end<=t);const collected=ready.reduce((n,x)=>n+x.value,0);s.cash+=collected;s.ships=s.ships.filter(x=>x.end>t);
   const completes=tasks.filter(x=>s.status[x.id]?.state==='active'&&s.status[x.id].end<=t);completes.forEach(x=>s.status[x.id]={state:'done'});

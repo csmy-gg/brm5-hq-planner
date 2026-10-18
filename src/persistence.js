@@ -17,7 +17,7 @@ export function createPersistence({validate,empty,onChange=()=>{},onStatus=()=>{
  function setChoice(kind,remote){choice={kind,remote,local:copy(envelope.profile),guest:changedGuest()?.profile||null};listeners();}
  function recover(remote,local){
   const backup={exportedAt:new Date().toISOString(),account: user?.id,cloud:remote?.profile??null,device:copy(local)};
-  const recoveryKey=prefix+':recovery:'+user.id;
+  const recoveryKey=prefix+':recovery:'+(user?.id||'guest');
   const previous=JSON.parse(storage.getItem(recoveryKey)||'[]');storage.setItem(recoveryKey,JSON.stringify([...previous,backup].slice(-3)));return backup;
  }
  async function fetchRow(){const {data,error}=await client.from('hq_profiles').select('profile,revision,updated_at,last_mutation_id').eq('user_id',user.id).maybeSingle();if(error)throw error;return data?{...data,profile:validate(data.profile)}:null;}
@@ -66,6 +66,7 @@ export function createPersistence({validate,empty,onChange=()=>{},onStatus=()=>{
   get key(){return activeKey();},get user(){return user;},get client(){return client;},get providers(){return providers;},get choice(){return choice;},get pending(){return Boolean(user&&envelope?.dirty);},get locked(){return busy||Boolean(choice)||Boolean(user&&problem&&!envelope?.dirty);},
   get status(){return !user?'Saved in this browser':choice?'Choose which HQ to use':busy?'Loading account save…':envelope?.dirty?(problem?'Offline—changes waiting to sync':'Saving to account'):problem?'Account save unavailable':'Saved to account';},
   get detail(){return problem;},
+  get canReset(){return !busy&&!running&&!choice&&!problem&&!envelope?.dirty&&(!user||globalThis.navigator?.onLine!==false);},
   load(){envelope=read()||fresh();return copy(envelope.profile);},
   readRaw(){const latest=read();return latest?JSON.stringify(latest.profile):null;},
   receiveStorage(raw){const e=JSON.parse(raw);e.profile=validate(e.profile);envelope=e;listeners();if(user)queueMicrotask(refresh);return copy(e.profile);},
@@ -91,6 +92,24 @@ export function createPersistence({validate,empty,onChange=()=>{},onStatus=()=>{
    // The durable account draft already exists. A full recovery quota must not prevent sign-out.
    if(envelope.dirty||choice){try{recover(choice?.remote,envelope.profile);}catch{}}
    const {error}=await client.auth.signOut({scope:'local'});if(error)throw Error('Could not sign out. Reconnect and try again.');await switchUser(null);
+  },
+  async resetProfile(){
+   if(!this.canReset)throw Error('Finish syncing and resolve account save issues before resetting.');
+   const latest=read();if(latest&&latest.profile.revision!==envelope.profile.revision)throw Error('Progress changed in another tab. Review the latest save before resetting.');
+   const epoch=generation,originalMutation=envelope.mutationId,originalRevision=envelope.profile.revision;busy=true;listeners();
+   try{
+    const remote=user?await fetchRow():null;
+    if(epoch!==generation)throw Error('The active account changed. Reset was cancelled.');
+    const current=read();if(current&&(current.mutationId!==originalMutation||current.profile.revision!==originalRevision))throw Error('Progress changed in another tab while preparing reset. Review the latest save before resetting.');
+    if(user&&(remote?.revision||0)!==envelope.baseRevision){setChoice('conflict',remote);throw Error('Account progress changed elsewhere. Review both saves before resetting.');}
+    recover(remote,envelope.profile);
+    const profile=validate({...empty(),revision:token()});
+    persist({...fresh(profile),baseRevision:envelope.baseRevision,dirty:Boolean(user)});problem='';
+   }finally{if(epoch===generation){busy=false;listeners();}}
+   notify();if(user)await flush();
+   if(epoch!==generation)throw Error('The active account changed while resetting.');
+   if(choice||envelope.dirty)throw Error(choice?'Reset conflicted with another device. Review saves; your previous HQ is preserved in recovery.':'Reset is saved on this device and waiting to sync. Keep this device copy until the account save succeeds.');
+   return copy(envelope.profile);
   },
   async resolve(which){
    if(!choice||busy)throw Error('No save choice is waiting.');

@@ -1,5 +1,6 @@
 import {AREAS,LABELS,clone,count,blocked,tasksFor,forecast,nextVisit} from './engine.js';
 import {applySessionBatch} from './session-actions.js';
+import {resourceMarkup} from './resource-ui.js';
 
 const escape=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const short=['CM','PM','Fuel','Equipment'];
@@ -7,7 +8,7 @@ export function createSessionWorkspace({getState,commit,data,date,money}){
  const dialog=document.querySelector('#finish-session-dialog'),$=s=>dialog.querySelector(s),$$=s=>[...dialog.querySelectorAll(s)];let context=null,trigger=null;
  const total=(s,area)=>Object.values(s.staff[area]).reduce((n,x)=>n+x,0);
  const quantity=n=>(Math.floor(n*100)/100).toLocaleString('en-US');
- const resources=res=>res.map((n,i)=>n?quantity(n)+' '+short[i]:'').filter(Boolean).join(' · ')||'No resources';
+ const resources=resourceMarkup;
  const button=(action,text,attributes='')=>`<button type="button" class="small-button" data-ws-action="${action}" ${attributes}>${text}</button>`;
  const included=(id,text)=>`<label class="checkbox ws-included"><input type="checkbox" id="${id}">${text}</label>`;
  function status(message,error=false){$('#workspace-status').textContent=message;$('#workspace-status').className=error?'ws-status error':'ws-status';$('#workspace-status').hidden=false;}
@@ -105,6 +106,7 @@ export function createSessionWorkspace({getState,commit,data,date,money}){
  dialog.addEventListener('cancel',event=>{if(context?.dirty.size){event.preventDefault();close();}});
  dialog.addEventListener('close',()=>{context=null;const target=trigger;trigger=null;if(target?.isConnected)target.focus();else document.querySelector('#finish-session').focus();});
  return {
+  get hasDrafts(){return Boolean(context?.dirty.size);},
   open(scheduled,element){
    if(dialog.open)return;if(scheduled!==nextVisit(getState()))throw Error('The current session changed. Review it first.');
    trigger=element;context={scheduled,revision:getState().revision,plan:plan(),dirty:new Set(),rankArea:'Operations',researchReflected:false,flags:{},dispatchToken:'checkin-'+scheduled+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,8)};

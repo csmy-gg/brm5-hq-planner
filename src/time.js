@@ -1,4 +1,5 @@
 export function validTimezone(zone){try{new Intl.DateTimeFormat('en',{timeZone:zone}).format();return typeof zone==='string'&&zone.length<100;}catch{return false;}}
+export const validTimestamp=value=>typeof value==='number'&&Number.isFinite(value)&&value>=0&&value<=8640000000000000;
 export function detectedTimezone(){const zone=Intl.DateTimeFormat().resolvedOptions().timeZone;return validTimezone(zone)?zone:'UTC';}
 export function calendarInput(timestamp,zone){
  const parts=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(timestamp).map(x=>[x.type,x.value]));

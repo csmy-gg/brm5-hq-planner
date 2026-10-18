@@ -1,1 +1,5 @@
-(()=>{const media=window.matchMedia('(prefers-color-scheme: dark)');let mode='system';try{const saved=localStorage.getItem('brm5-theme');if(['light','dark','system'].includes(saved))mode=saved;}catch{}const apply=()=>{document.documentElement.dataset.theme=mode==='system'?(media.matches?'dark':'light'):mode;};window.HQTheme={get:()=>mode,set:value=>{if(!['light','dark','system'].includes(value))return;mode=value;try{localStorage.setItem('brm5-theme',mode);}catch{}apply();}};media.addEventListener('change',apply);apply();})();
+import {readPreferences,savePreferences,applyPreferences} from './preferences.js';
+let preferences=readPreferences();
+window.HQTheme={get:()=>preferences.theme,set:theme=>{preferences=savePreferences({...preferences,theme});applyPreferences(preferences);}};
+for(const query of ['(prefers-color-scheme: dark)','(prefers-reduced-motion: reduce)'])matchMedia(query).addEventListener('change',()=>applyPreferences(readPreferences()));
+applyPreferences(preferences);
