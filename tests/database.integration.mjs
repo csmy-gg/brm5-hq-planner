@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {loadEnv} from 'vite';
+const env={...loadEnv('production',process.cwd(),''),...process.env},url=env.VITE_SUPABASE_URL,key=env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const configured=Boolean(url&&key),headers={apikey:key,'Content-Type':'application/json'};
+test('hosted Auth settings endpoint responds without exposing credentials',{skip:!configured},async()=>{const r=await fetch(url+'/auth/v1/settings',{headers});assert.equal(r.status,200);const d=await r.json();assert.equal(typeof d.external,'object');console.log('Enabled sign-in providers:',Object.entries(d.external).filter(([p,on])=>['google','discord'].includes(p)&&on).map(([p])=>p).join(', ')||'none—provider setup required');});
+test('guest HTTP requests cannot read account profiles',{skip:!configured},async()=>{const r=await fetch(url+'/rest/v1/hq_profiles?select=user_id',{headers});assert([401,403].includes(r.status));});
+test('guest HTTP requests cannot call the save endpoint',{skip:!configured},async()=>{const r=await fetch(url+'/rest/v1/rpc/save_hq_profile',{method:'POST',headers,body:JSON.stringify({p_profile:{version:1},p_expected_revision:0,p_mutation_id:crypto.randomUUID()})});assert([401,403].includes(r.status));});

@@ -1,0 +1,2655 @@
+{
+  "tasks": [
+    {
+      "name": "Fabrication",
+      "res": [
+        40,
+        0,
+        60,
+        5
+      ],
+      "cost": 5000,
+      "power": 5,
+      "hours": 0.004166666666666667,
+      "category": "Manufacturing",
+      "prerequisites": [],
+      "id": 100,
+      "legacyIndices": [
+        0
+      ],
+      "deps": []
+    },
+    {
+      "name": "Finishing",
+      "res": [
+        0,
+        0,
+        0,
+        5
+      ],
+      "cost": 500,
+      "power": 5,
+      "hours": 0.002777777777777778,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Fabrication"
+      ],
+      "id": 101,
+      "legacyIndices": [
+        1
+      ],
+      "deps": [
+        100
+      ]
+    },
+    {
+      "name": "Stock Handling I",
+      "res": [
+        0,
+        0,
+        0,
+        5
+      ],
+      "cost": 500,
+      "power": 10,
+      "hours": 0.16666666666666666,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Fabrication"
+      ],
+      "id": 102,
+      "legacyIndices": [
+        7
+      ],
+      "deps": [
+        100
+      ]
+    },
+    {
+      "name": "Material Shaping",
+      "res": [
+        10,
+        0,
+        0,
+        5
+      ],
+      "cost": 2000,
+      "power": 10,
+      "hours": 0.004166666666666667,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Fabrication"
+      ],
+      "aliases": [
+        "Basic material shaping workspace"
+      ],
+      "id": 103,
+      "legacyIndices": [
+        6,
+        8
+      ],
+      "deps": [
+        100
+      ]
+    },
+    {
+      "name": "Formative Manufacturing",
+      "res": [
+        0,
+        5,
+        0,
+        8
+      ],
+      "cost": 2000,
+      "power": 10,
+      "hours": 0.25,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Material Shaping"
+      ],
+      "id": 104,
+      "legacyIndices": [
+        13
+      ],
+      "deps": [
+        103
+      ]
+    },
+    {
+      "name": "Subtractive Manufacturing",
+      "res": [
+        0,
+        5,
+        0,
+        10
+      ],
+      "cost": 1500,
+      "power": 10,
+      "hours": 0.004166666666666667,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Material Shaping"
+      ],
+      "id": 105,
+      "legacyIndices": [
+        9
+      ],
+      "deps": [
+        103
+      ]
+    },
+    {
+      "name": "Stock Handling II",
+      "res": [
+        3,
+        0,
+        4,
+        4
+      ],
+      "cost": 4500,
+      "power": 30,
+      "hours": 6,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Stock Handling I"
+      ],
+      "id": 11,
+      "legacyIndices": [],
+      "deps": [
+        102
+      ]
+    },
+    {
+      "name": "Dimensional Refinement I",
+      "res": [
+        0,
+        0,
+        0,
+        5
+      ],
+      "cost": 1000,
+      "power": 20,
+      "hours": 2,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Finishing"
+      ],
+      "id": 106,
+      "legacyIndices": [
+        54
+      ],
+      "deps": [
+        101
+      ]
+    },
+    {
+      "name": "Material Conditioning",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 2000,
+      "power": 30,
+      "hours": 4,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Finishing"
+      ],
+      "id": 10,
+      "legacyIndices": [],
+      "deps": [
+        101
+      ]
+    },
+    {
+      "name": "Surface Conditioning I",
+      "res": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "cost": 500,
+      "power": 5,
+      "hours": 0.005555555555555556,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Finishing"
+      ],
+      "id": 107,
+      "legacyIndices": [
+        2
+      ],
+      "deps": [
+        101
+      ]
+    },
+    {
+      "name": "Surface Treatment",
+      "res": [
+        10,
+        0,
+        5,
+        0
+      ],
+      "cost": 2500,
+      "power": 15,
+      "hours": 0.002777777777777778,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Finishing"
+      ],
+      "id": 108,
+      "legacyIndices": [
+        3
+      ],
+      "deps": [
+        101
+      ]
+    },
+    {
+      "name": "Cosmetic & Indicative Finishing I",
+      "res": [
+        0,
+        0,
+        0,
+        5
+      ],
+      "cost": 500,
+      "power": 2,
+      "hours": 0.002777777777777778,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Surface Treatment"
+      ],
+      "id": 109,
+      "legacyIndices": [
+        5
+      ],
+      "deps": [
+        108
+      ]
+    },
+    {
+      "name": "Coating I",
+      "res": [
+        0,
+        0,
+        0,
+        5
+      ],
+      "cost": 500,
+      "power": 2,
+      "hours": 0.002777777777777778,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Surface Treatment"
+      ],
+      "id": 110,
+      "legacyIndices": [
+        4
+      ],
+      "deps": [
+        108
+      ]
+    },
+    {
+      "name": "Chemical & Electrochemical Treatment I",
+      "res": [
+        2,
+        2,
+        4,
+        12
+      ],
+      "cost": 500,
+      "power": 35,
+      "hours": 0.001388888888888889,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Surface Treatment"
+      ],
+      "clippedTitle": true,
+      "id": 111,
+      "legacyIndices": [],
+      "deps": [
+        108
+      ]
+    },
+    {
+      "name": "Surface Conditioning II",
+      "res": [
+        0,
+        0,
+        0,
+        3
+      ],
+      "cost": 3500,
+      "power": 40,
+      "hours": 4,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Surface Conditioning I"
+      ],
+      "id": 16,
+      "legacyIndices": [],
+      "deps": [
+        107
+      ]
+    },
+    {
+      "name": "Bulk Strengthening I",
+      "res": [
+        0,
+        0,
+        0,
+        5
+      ],
+      "cost": 500,
+      "power": 10,
+      "hours": 0.001388888888888889,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Material Conditioning"
+      ],
+      "id": 15,
+      "legacyIndices": [],
+      "deps": [
+        10
+      ]
+    },
+    {
+      "name": "Surface Strengthening I",
+      "res": [
+        0,
+        0,
+        0,
+        5
+      ],
+      "cost": 500,
+      "power": 2,
+      "hours": 0.001388888888888889,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Material Conditioning"
+      ],
+      "id": 14,
+      "legacyIndices": [],
+      "deps": [
+        10
+      ]
+    },
+    {
+      "name": "Internal Conditioning I",
+      "res": [
+        0,
+        0,
+        0,
+        5
+      ],
+      "cost": 500,
+      "power": 2,
+      "hours": 0.001388888888888889,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Material Conditioning"
+      ],
+      "id": 13,
+      "legacyIndices": [],
+      "deps": [
+        10
+      ]
+    },
+    {
+      "name": "Dimensional Refinement II",
+      "res": [
+        0,
+        0,
+        0,
+        2
+      ],
+      "cost": 500,
+      "power": 40,
+      "hours": 3,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Dimensional Refinement I"
+      ],
+      "id": 12,
+      "legacyIndices": [],
+      "deps": [
+        106
+      ]
+    },
+    {
+      "name": "Machining I",
+      "res": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "cost": 500,
+      "power": 5,
+      "hours": 0.3333333333333333,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Subtractive Manufacturing"
+      ],
+      "id": 112,
+      "legacyIndices": [],
+      "deps": [
+        105
+      ]
+    },
+    {
+      "name": "Cutting I",
+      "res": [
+        2,
+        1,
+        0,
+        4
+      ],
+      "cost": 500,
+      "power": 5,
+      "hours": 0.001388888888888889,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Subtractive Manufacturing"
+      ],
+      "id": 113,
+      "legacyIndices": [
+        10
+      ],
+      "deps": [
+        105
+      ]
+    },
+    {
+      "name": "Thermal Forming I",
+      "res": [
+        0,
+        2,
+        2,
+        2
+      ],
+      "cost": 500,
+      "power": 5,
+      "hours": 0.002777777777777778,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Formative Manufacturing"
+      ],
+      "id": 114,
+      "legacyIndices": [
+        14
+      ],
+      "deps": [
+        104
+      ]
+    },
+    {
+      "name": "Molding I",
+      "res": [
+        4,
+        3,
+        10,
+        8
+      ],
+      "cost": 1200,
+      "power": 20,
+      "hours": 4,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Formative Manufacturing"
+      ],
+      "id": 115,
+      "legacyIndices": [
+        16
+      ],
+      "deps": [
+        104
+      ]
+    },
+    {
+      "name": "Material Deformation I",
+      "res": [
+        2,
+        2,
+        0,
+        4
+      ],
+      "cost": 400,
+      "power": 10,
+      "hours": 0.5,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Formative Manufacturing"
+      ],
+      "id": 25,
+      "legacyIndices": [],
+      "deps": [
+        104
+      ]
+    },
+    {
+      "name": "Thermal Forming II",
+      "res": [
+        0,
+        5,
+        5,
+        5
+      ],
+      "cost": 3000,
+      "power": 15,
+      "hours": 0.08333333333333333,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Thermal Forming I"
+      ],
+      "id": 116,
+      "legacyIndices": [
+        15
+      ],
+      "deps": [
+        114
+      ]
+    },
+    {
+      "name": "Molding II",
+      "res": [
+        2,
+        6,
+        18,
+        12
+      ],
+      "cost": 5750,
+      "power": 55,
+      "hours": 8,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Molding I"
+      ],
+      "id": 24,
+      "legacyIndices": [],
+      "deps": [
+        115
+      ]
+    },
+    {
+      "name": "Material Deformation II",
+      "res": [
+        4,
+        0,
+        0,
+        6
+      ],
+      "cost": 750,
+      "power": 15,
+      "hours": 4,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Material Deformation I"
+      ],
+      "id": 26,
+      "legacyIndices": [],
+      "deps": [
+        25
+      ]
+    },
+    {
+      "name": "Material Deformation III",
+      "res": [
+        2,
+        8,
+        12,
+        5
+      ],
+      "cost": 800,
+      "power": 50,
+      "hours": 10,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Material Deformation II"
+      ],
+      "id": 27,
+      "legacyIndices": [],
+      "deps": [
+        26
+      ]
+    },
+    {
+      "name": "Molding III",
+      "res": [
+        4,
+        14,
+        35,
+        20
+      ],
+      "cost": 7250,
+      "power": 80,
+      "hours": 12,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Molding II"
+      ],
+      "id": 29,
+      "legacyIndices": [],
+      "deps": [
+        24
+      ]
+    },
+    {
+      "name": "Thermal Forming III",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 12500,
+      "power": 40,
+      "hours": 18,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Thermal Forming II"
+      ],
+      "id": 23,
+      "legacyIndices": [],
+      "deps": [
+        116
+      ]
+    },
+    {
+      "name": "Molding IV",
+      "res": [
+        20,
+        20,
+        45,
+        15
+      ],
+      "cost": 15000,
+      "power": 140,
+      "hours": 18.5,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Molding III"
+      ],
+      "id": 30,
+      "legacyIndices": [],
+      "deps": [
+        29
+      ]
+    },
+    {
+      "name": "Material Deformation IV",
+      "res": [
+        15,
+        12,
+        30,
+        15
+      ],
+      "cost": 8000,
+      "power": 114,
+      "hours": 12,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Material Deformation III"
+      ],
+      "id": 28,
+      "legacyIndices": [],
+      "deps": [
+        27
+      ]
+    },
+    {
+      "name": "Cutting II",
+      "res": [
+        0,
+        0,
+        0,
+        5
+      ],
+      "cost": 1000,
+      "power": 10,
+      "hours": 0.004166666666666667,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Cutting I"
+      ],
+      "id": 117,
+      "legacyIndices": [
+        11
+      ],
+      "deps": [
+        113
+      ]
+    },
+    {
+      "name": "Cutting III",
+      "res": [
+        0,
+        0,
+        0,
+        10
+      ],
+      "cost": 1500,
+      "power": 15,
+      "hours": 0.008333333333333333,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Cutting II"
+      ],
+      "id": 118,
+      "legacyIndices": [
+        12
+      ],
+      "deps": [
+        117
+      ]
+    },
+    {
+      "name": "Machining II",
+      "res": [
+        0,
+        0,
+        0,
+        3
+      ],
+      "cost": 3000,
+      "power": 25,
+      "hours": 0.5,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Machining I"
+      ],
+      "id": 119,
+      "legacyIndices": [],
+      "deps": [
+        112
+      ]
+    },
+    {
+      "name": "Machining III",
+      "res": [
+        0,
+        10,
+        0,
+        5
+      ],
+      "cost": 12500,
+      "power": 50,
+      "hours": 8.016666666666667,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Machining II"
+      ],
+      "id": 120,
+      "legacyIndices": [
+        55
+      ],
+      "deps": [
+        119
+      ]
+    },
+    {
+      "name": "Machining IV",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 16000,
+      "power": 55,
+      "hours": 4,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Machining III"
+      ],
+      "id": 22,
+      "legacyIndices": [],
+      "deps": [
+        120
+      ]
+    },
+    {
+      "name": "Cosmetic & Indicative Finishing II",
+      "res": [
+        0,
+        0,
+        0,
+        8
+      ],
+      "cost": 1000,
+      "power": 5,
+      "hours": 0.002777777777777778,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Cosmetic & Indicative Finishing I"
+      ],
+      "id": 121,
+      "legacyIndices": [
+        53
+      ],
+      "deps": [
+        109
+      ]
+    },
+    {
+      "name": "Coating II",
+      "res": [
+        0,
+        0,
+        0,
+        10
+      ],
+      "cost": 1000,
+      "power": 5,
+      "hours": 0.002777777777777778,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Coating I"
+      ],
+      "id": 122,
+      "legacyIndices": [
+        52
+      ],
+      "deps": [
+        110
+      ]
+    },
+    {
+      "name": "Chemical & Electrochemical Treatment II",
+      "res": [
+        8,
+        2,
+        6,
+        10
+      ],
+      "cost": 1000,
+      "power": 80,
+      "hours": 0.001388888888888889,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Chemical & Electrochemical Treatment I"
+      ],
+      "clippedTitle": true,
+      "id": 123,
+      "legacyIndices": [
+        51
+      ],
+      "deps": [
+        111
+      ]
+    },
+    {
+      "name": "Surface Conditioning III",
+      "res": [
+        8,
+        18,
+        12,
+        25
+      ],
+      "cost": 15000,
+      "power": 145,
+      "hours": 8,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Surface Conditioning II"
+      ],
+      "id": 18,
+      "legacyIndices": [],
+      "deps": [
+        16
+      ]
+    },
+    {
+      "name": "Bulk Strengthening II",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 4500,
+      "power": 35,
+      "hours": 6,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Bulk Strengthening I"
+      ],
+      "id": 17,
+      "legacyIndices": [],
+      "deps": [
+        15
+      ]
+    },
+    {
+      "name": "Chemical & Electrochemical Treatment III",
+      "res": [
+        12,
+        8,
+        14,
+        40
+      ],
+      "cost": 22500,
+      "power": 160,
+      "hours": 2,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Chemical & Electrochemical Treatment II"
+      ],
+      "clippedTitle": true,
+      "id": 19,
+      "legacyIndices": [],
+      "deps": [
+        123
+      ]
+    },
+    {
+      "name": "Coating III",
+      "res": [
+        0,
+        0,
+        0,
+        6
+      ],
+      "cost": 8000,
+      "power": 25,
+      "hours": 8,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Coating II"
+      ],
+      "id": 20,
+      "legacyIndices": [],
+      "deps": [
+        122
+      ]
+    },
+    {
+      "name": "Cosmetic & Indicative Finishing III",
+      "res": [
+        2,
+        0,
+        0,
+        4
+      ],
+      "cost": 5000,
+      "power": 15,
+      "hours": 6,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Cosmetic & Indicative Finishing II"
+      ],
+      "id": 21,
+      "legacyIndices": [],
+      "deps": [
+        121
+      ]
+    },
+    {
+      "name": "Assembly",
+      "res": [
+        30,
+        0,
+        50,
+        15
+      ],
+      "cost": 5000,
+      "power": 5,
+      "hours": 0.008333333333333333,
+      "category": "Manufacturing",
+      "prerequisites": [],
+      "id": 124,
+      "legacyIndices": [
+        17
+      ],
+      "deps": []
+    },
+    {
+      "name": "Alignment & Fit",
+      "res": [
+        5,
+        0,
+        0,
+        0
+      ],
+      "cost": 1000,
+      "power": 2,
+      "hours": 0.016666666666666666,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Assembly"
+      ],
+      "id": 125,
+      "legacyIndices": [
+        18
+      ],
+      "deps": [
+        124
+      ]
+    },
+    {
+      "name": "Environmental Hardening I",
+      "res": [
+        0,
+        15,
+        10,
+        5
+      ],
+      "cost": 5000,
+      "power": 20,
+      "hours": 0.16666666666666666,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Assembly"
+      ],
+      "id": 126,
+      "legacyIndices": [
+        22
+      ],
+      "deps": [
+        124
+      ]
+    },
+    {
+      "name": "Fastening I",
+      "res": [
+        0,
+        0,
+        0,
+        2
+      ],
+      "cost": 500,
+      "power": 5,
+      "hours": 0.25,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Assembly"
+      ],
+      "id": 127,
+      "legacyIndices": [
+        23
+      ],
+      "deps": [
+        124
+      ]
+    },
+    {
+      "name": "Joining",
+      "res": [
+        0,
+        0,
+        0,
+        5
+      ],
+      "cost": 2000,
+      "power": 5,
+      "hours": 0.03333333333333333,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Assembly"
+      ],
+      "id": 128,
+      "legacyIndices": [
+        24
+      ],
+      "deps": [
+        124
+      ]
+    },
+    {
+      "name": "Metallurgical Joining I",
+      "res": [
+        0,
+        5,
+        5,
+        10
+      ],
+      "cost": 10000,
+      "power": 15,
+      "hours": 0.08333333333333333,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Joining"
+      ],
+      "id": 129,
+      "legacyIndices": [
+        56
+      ],
+      "deps": [
+        128
+      ]
+    },
+    {
+      "name": "Mechanical Joining I",
+      "res": [
+        0,
+        0,
+        0,
+        6
+      ],
+      "cost": 1450,
+      "power": 20,
+      "hours": 4,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Joining"
+      ],
+      "id": 6,
+      "legacyIndices": [],
+      "deps": [
+        128
+      ]
+    },
+    {
+      "name": "Fusion Joining I",
+      "res": [
+        0,
+        5,
+        20,
+        5
+      ],
+      "cost": 5000,
+      "power": 10,
+      "hours": 2,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Joining"
+      ],
+      "id": 130,
+      "legacyIndices": [
+        26
+      ],
+      "deps": [
+        128
+      ]
+    },
+    {
+      "name": "Adhesive Joining I",
+      "res": [
+        0,
+        0,
+        5,
+        2
+      ],
+      "cost": 3500,
+      "power": 5,
+      "hours": 0.03333333333333333,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Joining"
+      ],
+      "id": 131,
+      "legacyIndices": [
+        25
+      ],
+      "deps": [
+        128
+      ]
+    },
+    {
+      "name": "Fastening II",
+      "res": [
+        0,
+        0,
+        0,
+        4
+      ],
+      "cost": 1000,
+      "power": 10,
+      "hours": 2,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Fastening I"
+      ],
+      "id": 4,
+      "legacyIndices": [],
+      "deps": [
+        127
+      ]
+    },
+    {
+      "name": "Environmental Hardening II",
+      "res": [
+        6,
+        0,
+        12,
+        8
+      ],
+      "cost": 17500,
+      "power": 45,
+      "hours": 16,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Environmental Hardening I"
+      ],
+      "id": 3,
+      "legacyIndices": [],
+      "deps": [
+        126
+      ]
+    },
+    {
+      "name": "Tolerance Control I",
+      "res": [
+        0,
+        0,
+        0,
+        10
+      ],
+      "cost": 2000,
+      "power": 15,
+      "hours": 0.75,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Alignment & Fit"
+      ],
+      "id": 132,
+      "legacyIndices": [
+        21
+      ],
+      "deps": [
+        125
+      ]
+    },
+    {
+      "name": "Placement & Seating I",
+      "res": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "cost": 500,
+      "power": 10,
+      "hours": 0.004166666666666667,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Alignment & Fit"
+      ],
+      "aliases": [
+        "Basic manual placement"
+      ],
+      "id": 133,
+      "legacyIndices": [
+        20
+      ],
+      "deps": [
+        125
+      ]
+    },
+    {
+      "name": "Calibration I",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 4000,
+      "power": 15,
+      "hours": 0.08333333333333333,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Alignment & Fit"
+      ],
+      "aliases": [
+        "Basic calibration equipment"
+      ],
+      "id": 134,
+      "legacyIndices": [
+        19
+      ],
+      "deps": [
+        125
+      ]
+    },
+    {
+      "name": "Calibration II",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 8000,
+      "power": 30,
+      "hours": 0.08333333333333333,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Calibration I"
+      ],
+      "id": 135,
+      "legacyIndices": [
+        50
+      ],
+      "deps": [
+        134
+      ]
+    },
+    {
+      "name": "Placement & Seating II",
+      "res": [
+        0,
+        0,
+        0,
+        10
+      ],
+      "cost": 1000,
+      "power": 10,
+      "hours": 0.03333333333333333,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Placement & Seating I"
+      ],
+      "id": 136,
+      "legacyIndices": [
+        57
+      ],
+      "deps": [
+        133
+      ]
+    },
+    {
+      "name": "Tolerance Control II",
+      "res": [
+        0,
+        0,
+        0,
+        4
+      ],
+      "cost": 1500,
+      "power": 40,
+      "hours": 4.5,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Tolerance Control I"
+      ],
+      "id": 1,
+      "legacyIndices": [],
+      "deps": [
+        132
+      ]
+    },
+    {
+      "name": "Placement & Seating III",
+      "res": [
+        0,
+        0,
+        0,
+        4
+      ],
+      "cost": 5500,
+      "power": 25,
+      "hours": 6,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Placement & Seating II"
+      ],
+      "id": 0,
+      "legacyIndices": [],
+      "deps": [
+        136
+      ]
+    },
+    {
+      "name": "Tolerance Control III",
+      "res": [
+        0,
+        0,
+        0,
+        8
+      ],
+      "cost": 4000,
+      "power": 55,
+      "hours": 12,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Tolerance Control II"
+      ],
+      "id": 2,
+      "legacyIndices": [],
+      "deps": [
+        1
+      ]
+    },
+    {
+      "name": "Fastening III",
+      "res": [
+        4,
+        0,
+        0,
+        8
+      ],
+      "cost": 12500,
+      "power": 40,
+      "hours": 16,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Fastening II"
+      ],
+      "id": 5,
+      "legacyIndices": [],
+      "deps": [
+        4
+      ]
+    },
+    {
+      "name": "Fusion Joining II",
+      "res": [
+        4,
+        4,
+        4,
+        6
+      ],
+      "cost": 4500,
+      "power": 45,
+      "hours": 6,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Fusion Joining I"
+      ],
+      "id": 7,
+      "legacyIndices": [],
+      "deps": [
+        130
+      ]
+    },
+    {
+      "name": "Mechanical Joining II",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 3000,
+      "power": 25,
+      "hours": 6,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Mechanical Joining I"
+      ],
+      "id": 8,
+      "legacyIndices": [],
+      "deps": [
+        6
+      ]
+    },
+    {
+      "name": "Mechanical Joining III",
+      "res": [
+        4,
+        0,
+        0,
+        12
+      ],
+      "cost": 15000,
+      "power": 40,
+      "hours": 18,
+      "category": "Manufacturing",
+      "prerequisites": [
+        "Mechanical Joining II"
+      ],
+      "id": 9,
+      "legacyIndices": [],
+      "deps": [
+        8
+      ]
+    },
+    {
+      "name": "Cobra HD 3000",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 1000,
+      "power": 25,
+      "hours": 0.005555555555555556,
+      "category": "Products",
+      "prerequisites": [
+        "Molding I",
+        "Cutting I",
+        "Stock Handling I",
+        "Surface Conditioning I",
+        "Coating I",
+        "Cosmetic & Indicative Finishing I",
+        "Calibration I",
+        "Placement & Seating I",
+        "Tolerance Control I",
+        "Environmental Hardening I",
+        "Fastening I",
+        "Adhesive Joining I",
+        "Electricity & Magnetism",
+        "Waves & Optics",
+        "Chemical Processing",
+        "Engineered Materials",
+        "Material Chemistry",
+        "Multivariable Models",
+        "Probability & Statistics"
+      ],
+      "dependencyCaution": "Manufacturing requirements are visible in the video; the named academic subset is retained from the HQ wiki because the product view is zoomed out.",
+      "id": 137,
+      "legacyIndices": [
+        42
+      ],
+      "deps": [
+        115,
+        113,
+        102,
+        107,
+        110,
+        109,
+        134,
+        133,
+        132,
+        126,
+        127,
+        131,
+        152,
+        154,
+        156,
+        158,
+        159,
+        147,
+        146
+      ]
+    },
+    {
+      "name": "Matrix 2",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 6000,
+      "power": 30,
+      "hours": 0.016666666666666666,
+      "category": "Products",
+      "prerequisites": [
+        "Molding I",
+        "Cutting I",
+        "Stock Handling I",
+        "Surface Conditioning I",
+        "Coating I",
+        "Cosmetic & Indicative Finishing I",
+        "Calibration I",
+        "Placement & Seating I",
+        "Tolerance Control I",
+        "Environmental Hardening I",
+        "Fastening I",
+        "Adhesive Joining I",
+        "Fusion Joining I",
+        "Mechanics",
+        "Electricity & Magnetism",
+        "Matter & Energy",
+        "Waves & Optics",
+        "Chemical Processing",
+        "Engineered Materials",
+        "Material Chemistry",
+        "Dynamics",
+        "Multivariable Models",
+        "Probability & Statistics"
+      ],
+      "dependencyCaution": "Manufacturing requirements are visible in the video; the named academic subset is retained from the HQ wiki because the product view is zoomed out.",
+      "id": 138,
+      "legacyIndices": [
+        43
+      ],
+      "deps": [
+        115,
+        113,
+        102,
+        107,
+        110,
+        109,
+        134,
+        133,
+        132,
+        126,
+        127,
+        131,
+        130,
+        151,
+        152,
+        153,
+        154,
+        156,
+        158,
+        159,
+        148,
+        147,
+        146
+      ]
+    },
+    {
+      "name": "HR 530F 'Skirmisher'",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 25000,
+      "power": 50,
+      "hours": 0.016666666666666666,
+      "category": "Products",
+      "prerequisites": [
+        "Fabrication",
+        "Finishing",
+        "Stock Handling I",
+        "Material Shaping",
+        "Formative Manufacturing",
+        "Subtractive Manufacturing",
+        "Stock Handling II",
+        "Dimensional Refinement I",
+        "Material Conditioning",
+        "Surface Conditioning I",
+        "Surface Treatment",
+        "Cosmetic & Indicative Finishing I",
+        "Coating I",
+        "Chemical & Electrochemical Treatment I",
+        "Surface Conditioning II",
+        "Bulk Strengthening I",
+        "Surface Strengthening I",
+        "Internal Conditioning I",
+        "Dimensional Refinement II",
+        "Machining I",
+        "Cutting I",
+        "Thermal Forming I",
+        "Molding I",
+        "Material Deformation I",
+        "Thermal Forming II",
+        "Molding II",
+        "Material Deformation II",
+        "Material Deformation III",
+        "Molding III",
+        "Molding IV",
+        "Material Deformation IV",
+        "Cutting II",
+        "Cutting III",
+        "Machining II",
+        "Machining III",
+        "Machining IV",
+        "Cosmetic & Indicative Finishing II",
+        "Coating II",
+        "Chemical & Electrochemical Treatment II",
+        "Bulk Strengthening II",
+        "Coating III",
+        "Assembly",
+        "Alignment & Fit",
+        "Environmental Hardening I",
+        "Fastening I",
+        "Joining",
+        "Metallurgical Joining I",
+        "Mechanical Joining I",
+        "Fusion Joining I",
+        "Adhesive Joining I",
+        "Fastening II",
+        "Environmental Hardening II",
+        "Tolerance Control I",
+        "Placement & Seating I",
+        "Calibration I",
+        "Calibration II",
+        "Placement & Seating II",
+        "Tolerance Control II",
+        "Placement & Seating III",
+        "Fastening III",
+        "Fusion Joining II",
+        "Mechanical Joining II",
+        "Engineering Foundations",
+        "Technical Standards",
+        "System Integration",
+        "Design Discipline",
+        "Mathematics",
+        "Probability & Statistics",
+        "Multivariable Models",
+        "Mathematical Logic",
+        "Dynamics",
+        "Science",
+        "Physics",
+        "Mechanics",
+        "Electricity & Magnetism",
+        "Matter & Energy",
+        "Waves & Optics",
+        "Chemistry",
+        "Chemical Processing",
+        "Energetic & Reactive Chemistry",
+        "Engineered Materials",
+        "Material Chemistry"
+      ],
+      "dependencyCaution": "The six optional tier III items identified on 18 October are excluded from Skirmisher requirements.",
+      "id": 139,
+      "legacyIndices": [
+        46
+      ],
+      "deps": [
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        11,
+        106,
+        10,
+        107,
+        108,
+        109,
+        110,
+        111,
+        16,
+        15,
+        14,
+        13,
+        12,
+        112,
+        113,
+        114,
+        115,
+        25,
+        116,
+        24,
+        26,
+        27,
+        29,
+        30,
+        28,
+        117,
+        118,
+        119,
+        120,
+        22,
+        121,
+        122,
+        123,
+        17,
+        20,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        6,
+        130,
+        131,
+        4,
+        3,
+        132,
+        133,
+        134,
+        135,
+        136,
+        1,
+        0,
+        5,
+        7,
+        8,
+        31,
+        32,
+        33,
+        34,
+        145,
+        146,
+        147,
+        35,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159
+      ]
+    },
+    {
+      "name": "M320A1",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 5000,
+      "power": 40,
+      "hours": 0.016666666666666666,
+      "category": "Products",
+      "prerequisites": [
+        "Thermal Forming II",
+        "Cutting III",
+        "Machining III",
+        "Dimensional Refinement I",
+        "Surface Conditioning I",
+        "Chemical & Electrochemical Treatment II",
+        "Coating II",
+        "Cosmetic & Indicative Finishing II",
+        "Calibration II",
+        "Placement & Seating II",
+        "Tolerance Control I",
+        "Environmental Hardening I",
+        "Fastening I",
+        "Fusion Joining I",
+        "Metallurgical Joining I",
+        "Mechanics",
+        "Matter & Energy",
+        "Waves & Optics",
+        "Chemical Processing",
+        "Energetic & Reactive Chemistry",
+        "Engineered Materials",
+        "Dynamics"
+      ],
+      "dependencyCaution": "Manufacturing requirements are visible in the video; the named academic subset is retained from the HQ wiki because the product view is zoomed out.",
+      "id": 140,
+      "legacyIndices": [
+        44
+      ],
+      "deps": [
+        116,
+        118,
+        120,
+        106,
+        107,
+        123,
+        122,
+        121,
+        135,
+        136,
+        132,
+        126,
+        127,
+        130,
+        129,
+        151,
+        153,
+        154,
+        156,
+        157,
+        158,
+        148
+      ]
+    },
+    {
+      "name": "40x46mm (M441) Grenade Ammunition",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 0,
+      "power": 0,
+      "hours": 0.001388888888888889,
+      "category": "Products",
+      "prerequisites": [
+        "M320A1"
+      ],
+      "aliases": [
+        "M441 grenade ammo",
+        "M441"
+      ],
+      "parent": "M320A1",
+      "id": 141,
+      "legacyIndices": [
+        45
+      ],
+      "deps": [
+        140
+      ]
+    },
+    {
+      "name": "M151 HE Air-to-Ground Rockets",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 10000,
+      "power": 45,
+      "hours": 0.016666666666666666,
+      "category": "Products",
+      "prerequisites": [
+        "HR 530F 'Skirmisher'"
+      ],
+      "parent": "HR 530F 'Skirmisher'",
+      "id": 142,
+      "legacyIndices": [
+        49
+      ],
+      "deps": [
+        139
+      ]
+    },
+    {
+      "name": "12.7x99mm NATO Linked Ammunition",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 7500,
+      "power": 40,
+      "hours": 0.016666666666666666,
+      "category": "Products",
+      "prerequisites": [
+        "HR 530F 'Skirmisher'"
+      ],
+      "parent": "HR 530F 'Skirmisher'",
+      "id": 143,
+      "legacyIndices": [
+        48
+      ],
+      "deps": [
+        139
+      ]
+    },
+    {
+      "name": "7.62x51mm NATO Linked Ammunition",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 5000,
+      "power": 35,
+      "hours": 0.016666666666666666,
+      "category": "Products",
+      "prerequisites": [
+        "HR 530F 'Skirmisher'"
+      ],
+      "parent": "HR 530F 'Skirmisher'",
+      "id": 144,
+      "legacyIndices": [
+        47
+      ],
+      "deps": [
+        139
+      ]
+    },
+    {
+      "name": "Engineering Foundations",
+      "res": [
+        0,
+        0,
+        0,
+        4
+      ],
+      "cost": 17500,
+      "power": 60,
+      "hours": 12,
+      "category": "Education",
+      "prerequisites": [
+        "Physics",
+        "Chemistry",
+        "Probability & Statistics",
+        "Multivariable Models",
+        "Mathematical Logic",
+        "Dynamics"
+      ],
+      "id": 31,
+      "legacyIndices": [],
+      "deps": [
+        150,
+        155,
+        146,
+        147,
+        35,
+        148
+      ]
+    },
+    {
+      "name": "Technical Standards",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 9000,
+      "power": 150,
+      "hours": 18,
+      "category": "Education",
+      "prerequisites": [
+        "Engineering Foundations"
+      ],
+      "id": 32,
+      "legacyIndices": [],
+      "deps": [
+        31
+      ]
+    },
+    {
+      "name": "System Integration",
+      "res": [
+        0,
+        0,
+        0,
+        14
+      ],
+      "cost": 5000,
+      "power": 160,
+      "hours": 0,
+      "category": "Education",
+      "prerequisites": [
+        "Engineering Foundations"
+      ],
+      "id": 33,
+      "legacyIndices": [],
+      "deps": [
+        31
+      ]
+    },
+    {
+      "name": "Design Discipline",
+      "res": [
+        2,
+        0,
+        0,
+        4
+      ],
+      "cost": 4000,
+      "power": 75,
+      "hours": 4,
+      "category": "Education",
+      "prerequisites": [
+        "Engineering Foundations"
+      ],
+      "id": 34,
+      "legacyIndices": [],
+      "deps": [
+        31
+      ]
+    },
+    {
+      "name": "Mathematics",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 2000,
+      "power": 20,
+      "hours": 2,
+      "category": "Education",
+      "prerequisites": [],
+      "id": 145,
+      "legacyIndices": [
+        38
+      ],
+      "deps": []
+    },
+    {
+      "name": "Probability & Statistics",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 3000,
+      "power": 40,
+      "hours": 1,
+      "category": "Education",
+      "prerequisites": [
+        "Mathematics"
+      ],
+      "aliases": [
+        "Probability & models"
+      ],
+      "id": 146,
+      "legacyIndices": [
+        41
+      ],
+      "deps": [
+        145
+      ]
+    },
+    {
+      "name": "Multivariable Models",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 8000,
+      "power": 40,
+      "hours": 3,
+      "category": "Education",
+      "prerequisites": [
+        "Mathematics"
+      ],
+      "id": 147,
+      "legacyIndices": [
+        40
+      ],
+      "deps": [
+        145
+      ]
+    },
+    {
+      "name": "Mathematical Logic",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 4000,
+      "power": 25,
+      "hours": 4,
+      "category": "Education",
+      "prerequisites": [
+        "Mathematics"
+      ],
+      "id": 35,
+      "legacyIndices": [],
+      "deps": [
+        145
+      ]
+    },
+    {
+      "name": "Dynamics",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 5000,
+      "power": 60,
+      "hours": 3,
+      "category": "Education",
+      "prerequisites": [
+        "Mathematics"
+      ],
+      "id": 148,
+      "legacyIndices": [
+        39
+      ],
+      "deps": [
+        145
+      ]
+    },
+    {
+      "name": "Science",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 15000,
+      "power": 30,
+      "hours": 5,
+      "category": "Education",
+      "prerequisites": [],
+      "id": 149,
+      "legacyIndices": [
+        27
+      ],
+      "deps": []
+    },
+    {
+      "name": "Physics",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 8000,
+      "power": 40,
+      "hours": 2,
+      "category": "Education",
+      "prerequisites": [
+        "Science"
+      ],
+      "id": 150,
+      "legacyIndices": [
+        28
+      ],
+      "deps": [
+        149
+      ]
+    },
+    {
+      "name": "Mechanics",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 4000,
+      "power": 20,
+      "hours": 0.5,
+      "category": "Education",
+      "prerequisites": [
+        "Physics"
+      ],
+      "id": 151,
+      "legacyIndices": [
+        29
+      ],
+      "deps": [
+        150
+      ]
+    },
+    {
+      "name": "Electricity & Magnetism",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 7500,
+      "power": 35,
+      "hours": 0.5,
+      "category": "Education",
+      "prerequisites": [
+        "Physics"
+      ],
+      "id": 152,
+      "legacyIndices": [
+        30
+      ],
+      "deps": [
+        150
+      ]
+    },
+    {
+      "name": "Matter & Energy",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 10000,
+      "power": 40,
+      "hours": 0.5,
+      "category": "Education",
+      "prerequisites": [
+        "Physics"
+      ],
+      "id": 153,
+      "legacyIndices": [
+        31
+      ],
+      "deps": [
+        150
+      ]
+    },
+    {
+      "name": "Waves & Optics",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 10000,
+      "power": 50,
+      "hours": 0.5,
+      "category": "Education",
+      "prerequisites": [
+        "Physics"
+      ],
+      "id": 154,
+      "legacyIndices": [
+        32
+      ],
+      "deps": [
+        150
+      ]
+    },
+    {
+      "name": "Chemistry",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 5000,
+      "power": 20,
+      "hours": 2,
+      "category": "Education",
+      "prerequisites": [
+        "Science"
+      ],
+      "id": 155,
+      "legacyIndices": [
+        33
+      ],
+      "deps": [
+        149
+      ]
+    },
+    {
+      "name": "Chemical Processing",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 6000,
+      "power": 35,
+      "hours": 0.5,
+      "category": "Education",
+      "prerequisites": [
+        "Chemistry"
+      ],
+      "id": 156,
+      "legacyIndices": [
+        34
+      ],
+      "deps": [
+        155
+      ]
+    },
+    {
+      "name": "Energetic & Reactive Chemistry",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 6000,
+      "power": 35,
+      "hours": 0.5,
+      "category": "Education",
+      "prerequisites": [
+        "Chemistry"
+      ],
+      "id": 157,
+      "legacyIndices": [
+        35
+      ],
+      "deps": [
+        155
+      ]
+    },
+    {
+      "name": "Engineered Materials",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 3000,
+      "power": 30,
+      "hours": 0.5,
+      "category": "Education",
+      "prerequisites": [
+        "Chemistry"
+      ],
+      "id": 158,
+      "legacyIndices": [
+        36
+      ],
+      "deps": [
+        155
+      ]
+    },
+    {
+      "name": "Material Chemistry",
+      "res": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "cost": 4000,
+      "power": 25,
+      "hours": 0.5,
+      "category": "Education",
+      "prerequisites": [
+        "Chemistry"
+      ],
+      "id": 159,
+      "legacyIndices": [
+        37
+      ],
+      "deps": [
+        155
+      ]
+    }
+  ],
+  "wiki": {
+    "source": "https://roblox-blackhawk-rescue-mission-5.fandom.com/wiki/Headquarters",
+    "checked": "2026-10-17",
+    "status": "Wiki explicitly marked outdated. Data is editable nominal reference, not guaranteed current.",
+    "resourceOrder": [
+      "cm",
+      "pm",
+      "fuel",
+      "equipment"
+    ],
+    "sellPrices": {
+      "cm": 100,
+      "pm": 750,
+      "fuel": 150,
+      "equipment": 300
+    },
+    "deliveryHours": 6,
+    "staff": {
+      "D-": {
+        "operationsPerDay": {
+          "cm": 8.6,
+          "pm": 1,
+          "fuel": 8.6,
+          "equipment": 2
+        },
+        "storage": 6,
+        "deliveryEfficiencyPercent": 105,
+        "deliveryUnitCapacityConservative": 10,
+        "defenseEfficiencyPercent": 1,
+        "healingEfficiencyPercent": 20
+      },
+      "D": {
+        "operationsPerDay": {
+          "cm": 10,
+          "pm": 1,
+          "fuel": 10,
+          "equipment": 2
+        },
+        "storage": 7,
+        "deliveryEfficiencyPercent": 111,
+        "deliveryUnitCapacityConservative": 11,
+        "defenseEfficiencyPercent": 2,
+        "healingEfficiencyPercent": 31
+      },
+      "D+": {
+        "operationsPerDay": {
+          "cm": 10.6,
+          "pm": 1,
+          "fuel": 10.6,
+          "equipment": 2.1
+        },
+        "storage": 8,
+        "deliveryEfficiencyPercent": 119,
+        "deliveryUnitCapacityConservative": 11,
+        "defenseEfficiencyPercent": 3,
+        "healingEfficiencyPercent": 37
+      },
+      "C-": {
+        "operationsPerDay": {
+          "cm": 11.2,
+          "pm": 1.1,
+          "fuel": 11.2,
+          "equipment": 2.2
+        },
+        "storage": 9,
+        "deliveryEfficiencyPercent": 129,
+        "deliveryUnitCapacityConservative": 12,
+        "defenseEfficiencyPercent": 4,
+        "healingEfficiencyPercent": 42
+      },
+      "C": {
+        "operationsPerDay": {
+          "cm": 11.9,
+          "pm": 1.1,
+          "fuel": 11.9,
+          "equipment": 2.3
+        },
+        "storage": 10,
+        "deliveryEfficiencyPercent": 140,
+        "deliveryUnitCapacityConservative": 14,
+        "defenseEfficiencyPercent": 5,
+        "healingEfficiencyPercent": 48
+      },
+      "C+": {
+        "operationsPerDay": {
+          "cm": 12.7,
+          "pm": 1.2,
+          "fuel": 12.7,
+          "equipment": 2.5
+        },
+        "storage": 11,
+        "deliveryEfficiencyPercent": 152,
+        "deliveryUnitCapacityConservative": 15,
+        "defenseEfficiencyPercent": 6,
+        "healingEfficiencyPercent": 54
+      },
+      "B-": {
+        "operationsPerDay": {
+          "cm": 13.6,
+          "pm": 1.3,
+          "fuel": 13.6,
+          "equipment": 2.6
+        },
+        "storage": 12,
+        "deliveryEfficiencyPercent": 165,
+        "deliveryUnitCapacityConservative": 16,
+        "defenseEfficiencyPercent": 7,
+        "healingEfficiencyPercent": 60
+      },
+      "B": {
+        "operationsPerDay": {
+          "cm": 14.6,
+          "pm": 1.3,
+          "fuel": 14.6,
+          "equipment": 2.7
+        },
+        "storage": 13,
+        "deliveryEfficiencyPercent": 179,
+        "deliveryUnitCapacityConservative": 17,
+        "defenseEfficiencyPercent": 8,
+        "healingEfficiencyPercent": 65
+      },
+      "B+": {
+        "operationsPerDay": {
+          "cm": 15.9,
+          "pm": 1.4,
+          "fuel": 15.9,
+          "equipment": 2.9
+        },
+        "storage": 14,
+        "deliveryEfficiencyPercent": 194,
+        "deliveryUnitCapacityConservative": 19,
+        "defenseEfficiencyPercent": 9,
+        "healingEfficiencyPercent": 71
+      },
+      "A-": {
+        "operationsPerDay": {
+          "cm": 17.2,
+          "pm": 1.5,
+          "fuel": 17.2,
+          "equipment": 3.1
+        },
+        "storage": 15,
+        "deliveryEfficiencyPercent": 210,
+        "deliveryUnitCapacityConservative": 21,
+        "defenseEfficiencyPercent": 10,
+        "healingEfficiencyPercent": 77
+      },
+      "A": {
+        "operationsPerDay": {
+          "cm": 18.9,
+          "pm": 1.6,
+          "fuel": 18.9,
+          "equipment": 3.3
+        },
+        "storage": 16,
+        "deliveryEfficiencyPercent": 227,
+        "deliveryUnitCapacityConservative": 22,
+        "defenseEfficiencyPercent": 11,
+        "healingEfficiencyPercent": 82
+      },
+      "A+": {
+        "operationsPerDay": {
+          "cm": 20.9,
+          "pm": 1.7,
+          "fuel": 20.9,
+          "equipment": 3.5
+        },
+        "storage": 17,
+        "deliveryEfficiencyPercent": 245,
+        "deliveryUnitCapacityConservative": 24,
+        "defenseEfficiencyPercent": 12,
+        "healingEfficiencyPercent": 88
+      },
+      "S": {
+        "operationsPerDay": {
+          "cm": 23.4,
+          "pm": 1.9,
+          "fuel": 23.4,
+          "equipment": 3.8
+        },
+        "storage": 18,
+        "deliveryEfficiencyPercent": 263,
+        "deliveryUnitCapacityConservative": 26,
+        "defenseEfficiencyPercent": 13,
+        "healingEfficiencyPercent": 94
+      },
+      "S+": {
+        "operationsPerDay": {
+          "cm": 26.6,
+          "pm": 2,
+          "fuel": 26.6,
+          "equipment": 4.1
+        },
+        "storage": 19,
+        "deliveryEfficiencyPercent": 282,
+        "deliveryUnitCapacityConservative": 28,
+        "defenseEfficiencyPercent": 14,
+        "healingEfficiencyPercent": 100
+      },
+      "S++": {
+        "operationsPerDay": {
+          "cm": 30.8,
+          "pm": 2.2,
+          "fuel": 30.8,
+          "equipment": 4.5
+        },
+        "storage": 20,
+        "deliveryEfficiencyPercent": 302,
+        "deliveryUnitCapacityConservative": 30,
+        "defenseEfficiencyPercent": 15,
+        "healingEfficiencyPercent": 105
+      }
+    }
+  }
+}
