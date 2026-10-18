@@ -5,7 +5,7 @@ import {createEmptyProfile} from '../src/empty-profile.js';
 import {validateProfile} from '../src/profile.js';
 import {metrics,projectStock,forecast,blocked} from '../src/engine.js';
 import {preferenceDefaults,validatePreferences,readPreferences,savePreferences,PREFERENCES_KEY} from '../src/preferences.js';
-import {visibleResearch,goalProgress} from '../src/research-view.js';
+import {visibleResearch,goalProgress,productGoals} from '../src/research-view.js';
 import {searchTimezones,timezoneOffset,mapClusters} from '../src/timezone-picker.js';
 import {calendarInput,zonedTimestamp} from '../src/time.js';
 
@@ -71,3 +71,7 @@ test('out-of-range imported dates and duplicate delivery staff are rejected befo
 
 test('extreme supported deadlines cannot produce unformattable forecast dates',()=>{const state=empty();state.setupComplete=true;state.anchor='2026-10-18T12:00';state.session.scheduled=8640000000000000-30000;const result=forecast(validateProfile(state),DATA);assert.deepEqual(result.rows,[]);assert.equal(result.finished,false);});
 test('malformed storage flags, duplicate delivery IDs and invalid delivery dates fail validation',()=>{for(const mutate of [s=>s.autoCapacity='false',s=>s.ships=[{id:'same',end:0,value:1,resource:0,quantity:1,staffIds:[]},{id:'same',end:0,value:1,resource:0,quantity:1,staffIds:[]}],s=>s.ships=[{id:'bad-date',end:Number.MAX_SAFE_INTEGER,value:1,resource:0,quantity:1,staffIds:[]}]]){const state=empty();mutate(state);assert.throws(()=>validateProfile(state));}});
+
+import {chartRegions,offsetMinutes,zonesAtOffset} from '../src/timezone-chart.js';
+test('goal choices contain only products while existing research goals remain compatible',()=>{const choices=productGoals(DATA.tasks);assert.equal(choices.length,8);assert(choices.some(t=>t.name.includes('Skirmisher')));assert(choices.every(t=>t.category==='Products'));assert(!choices.some(t=>t.name==='Mathematics'));const state=empty();state.goal=String(DATA.tasks.find(t=>t.name==='Mathematics').id);assert.equal(validateProfile(state).goal,state.goal);});
+test('timezone regions retain exact IANA choices and use current seasonal offsets',()=>{const now=Date.UTC(2026,9,18),regions=chartRegions(now);assert.equal(new Set(regions.flatMap(r=>r.zones)).size,418);assert(regions.find(r=>r.zones.includes('America/Caracas')).offsets.includes(-240));assert(regions.find(r=>r.zones.includes('Pacific/Norfolk')).offsets.includes(offsetMinutes('Pacific/Norfolk',now)));assert.equal(offsetMinutes('Asia/Kathmandu',now),345);assert(zonesAtOffset(345,now).some(entry=>entry.id==='Asia/Kathmandu'));assert.equal(offsetMinutes('Europe/Prague',Date.UTC(2026,0,1)),60);assert.equal(offsetMinutes('Europe/Prague',Date.UTC(2026,6,1)),120);});
