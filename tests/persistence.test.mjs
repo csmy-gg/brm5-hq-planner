@@ -7,7 +7,7 @@ function memory(){const map=new Map();return {getItem:k=>map.get(k)??null,setIte
 function backend(){return {rows:new Map(),offline:false,loseAck:false,gate:null,writes:0};}
 function fake(db,id){let who=id,change;const client={
  auth:{getSession:async()=>({data:{session:who?{user:{id:who,email:who+'@test.invalid'}}:null}}),onAuthStateChange:f=>{change=f;},signOut:async()=>{who=null;change?.('SIGNED_OUT',null);return {};},signInWithOAuth:async()=>({})},
- from:()=>({select:()=>({eq:(_column,user)=>({maybeSingle:async()=>{if(db.readGate)await db.readGate;if(db.offline)throw Error('offline');return {data:clone(db.rows.get(user)||null)};}})})}),
+ from:()=>({select:()=>({eq:(_column,user)=>({maybeSingle:async()=>{const readGate=db.readGates?.get(user)||db.readGate;if(readGate)await readGate;if(db.offline)throw Error('offline');return {data:clone(db.rows.get(user)||null)};}})})}),
  rpc:async(_name,p)=>{const owner=who;if(db.offline)return {error:{code:'network'}};if(db.gate)await db.gate;const row=db.rows.get(owner);if(row?.last_mutation_id===p.p_mutation_id)return {data:{revision:row.revision}};if((row?.revision||0)!==p.p_expected_revision)return {error:{code:'40001'}};const next={profile:clone(p.p_profile),revision:(row?.revision||0)+1,last_mutation_id:p.p_mutation_id,updated_at:new Date().toISOString()};db.rows.set(owner,next);db.writes++;if(db.loseAck){db.loseAck=false;return {error:{code:'network'}};}return {data:{revision:next.revision}};},
  emit:async next=>{who=next;change?.('SIGNED_IN',next?{user:{id:next}}:null);await tick();}
  };return client;
@@ -40,3 +40,6 @@ test('reset lost acknowledgement retries once without losing the prior HQ recove
 
 
 test('a different tab cannot be overwritten while reset checks the account revision',async()=>{const db=backend(),d=device(db,'alice');await init(d);d.edit(100);await tick();let release;db.readGate=new Promise(resolve=>release=resolve);const pending=d.p.resetProfile();await tick();const envelope=JSON.parse(d.storage.getItem(d.p.key));envelope.profile.cash=250;envelope.profile.revision=crypto.randomUUID();envelope.mutationId=crypto.randomUUID();envelope.dirty=true;const raw=JSON.stringify(envelope);d.storage.setItem(d.p.key,raw);d.p.receiveStorage(raw);db.readGate=null;release();await assert.rejects(pending,/changed in another tab/);assert.equal(JSON.parse(d.storage.getItem(d.p.key)).profile.cash,250);assert.equal(db.rows.get('alice').profile.cash,100);});
+
+
+test('a cancelled reset cannot unlock a different account while its save is loading',async()=>{const db=backend(),d=device(db,'alice');await init(d);d.edit(999);await tick();let releaseAlice,releaseBob;db.readGates=new Map([['alice',new Promise(r=>releaseAlice=r)],['bob',new Promise(r=>releaseBob=r)]]);const reset=d.p.resetProfile();await tick();await d.client.emit('bob');assert.equal(d.state.cash,0);releaseAlice();await assert.rejects(reset,/active account changed/);assert.equal(d.p.locked,true);assert.throws(()=>d.edit(12),/Review/);releaseBob();await tick();await d.p.resolve('empty');assert.equal(d.p.user.id,'bob');assert.equal(d.state.cash,0);assert.equal(db.rows.get('alice').profile.cash,999);});
