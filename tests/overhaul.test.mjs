@@ -21,13 +21,13 @@ test('device preferences default by existing HQ, migrate theme, and never modify
   assert(saved.getItem(PREFERENCES_KEY));
 });
 
-test('Ready now exactly matches start eligibility, including reserve, dependencies and expired active power',()=>{
+test('Ready now exactly matches start eligibility, including reserve, dependencies and running power',()=>{
   const state=empty();state.cash=100000;state.res=[100,100,100,100];state.power=191;
   assert.deepEqual(visibleResearch(DATA.tasks,state,{filter:'ready'}).map(t=>t.id),DATA.tasks.filter(t=>blocked(t,state,DATA.tasks).length===0).map(t=>t.id));
-  state.status[DATA.tasks[0].id]={state:'active',end:0};state.power=DATA.tasks[0].power;
+  state.status[DATA.tasks[0].id]={state:'active',end:Date.now()+60000};state.power=DATA.tasks[0].power;
   assert.equal(visibleResearch(DATA.tasks,state,{filter:'ready'}).every(t=>t.power===0),true);
   state.reserve=state.cash;assert(visibleResearch(DATA.tasks,state,{filter:'ready'}).every(t=>t.cost===0));
-  const tasks=[{id:1,name:'Active',power:180,deps:[],cost:0,res:[0,0,0,0]},{id:2,name:'Fits',power:11,deps:[],cost:0,res:[0,0,0,0]},{id:3,name:'Too much',power:12,deps:[],cost:0,res:[0,0,0,0]}];state.power=191;state.status={1:{state:'active',end:0},2:{state:'todo'},3:{state:'todo'}};
+  const tasks=[{id:1,name:'Active',power:180,deps:[],cost:0,res:[0,0,0,0]},{id:2,name:'Fits',power:11,deps:[],cost:0,res:[0,0,0,0]},{id:3,name:'Too much',power:12,deps:[],cost:0,res:[0,0,0,0]}];state.power=191;state.status={1:{state:'active',end:Date.now()+60000},2:{state:'todo'},3:{state:'todo'}};
   assert.deepEqual(visibleResearch(tasks,state,{filter:'ready'}).map(t=>t.id),[2]);
 });
 

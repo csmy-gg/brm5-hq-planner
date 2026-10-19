@@ -16,5 +16,18 @@ test('import validation rejects invalid numbers, malformed histories and assignm
 test('multiple timezones, missing spring hour and repeated autumn hour resolve predictably',()=>{assert.equal(new Date(zonedTimestamp('2026-10-18T12:00','Europe/Prague')).toISOString(),'2026-10-18T10:00:00.000Z');assert.equal(new Date(zonedTimestamp('2026-10-18T12:00','America/New_York')).toISOString(),'2026-10-18T16:00:00.000Z');assert.throws(()=>zonedTimestamp('2026-03-29T02:30','Europe/Prague'),/does not exist/);assert.equal(new Date(zonedTimestamp('2026-10-25T02:30','Europe/Prague')).toISOString(),'2026-10-25T00:30:00.000Z');assert.throws(()=>zonedTimestamp('2026-02-30T12:00','UTC'));});
 test('changing display timezone keeps session and active timer instants intact',()=>{const s=ready();s.status[100]={state:'active',end:now+60000};const changed={...s,timezone:'America/New_York',anchor:calendarInput(nextVisit(s),'America/New_York')};const v=validateProfile(changed);assert.equal(nextVisit(v),nextVisit(s));assert.deepEqual(v.status,s.status);s.session.scheduled=Date.parse('2026-10-24T22:00Z');const n=finishSession(s,s.session.scheduled,Date.parse('2026-10-25T01:00Z'));assert.equal(n.session.scheduled-s.session.scheduled,12*3600000);});
 test('deliveries and research costs are applied once and batch failure is atomic',()=>{let s=ready();const original=structuredClone(s);s=dispatch(s,2,20,DATA.wiki,now);assert.equal(s.res[2],30);const id=s.ships[0].id;assert.throws(()=>collect(s,now,id));s=collect(s,now+21600000,id);assert.equal(s.cash,103000);assert.throws(()=>collect(s,now+21600000,id));const t=find('Fabrication');s.res[2]=80;s=start(s,t.id,DATA.tasks,now);assert.equal(s.cash,98000);assert.throws(()=>start(s,t.id,DATA.tasks,now));assert.throws(()=>applySessionBatch(original,[{type:'balances',cash:500,res:[1,2,3,4]},{type:'dispatch',resource:2,quantity:1000}],DATA,now));assert.deepEqual(original,ready());});
-test('shared power and prerequisites constrain every forecast start',()=>{const s=ready(),copy=structuredClone(s),f=forecast(s,DATA,now,160);assert(f.rows.length);assert.deepEqual(s,copy);const done=new Set(),active=new Map();for(const row of f.rows){row.completes.forEach(id=>{done.add(id);active.delete(id);});for(const id of row.starts){const t=DATA.tasks.find(t=>t.id===id);assert(t.deps.every(d=>done.has(d)),t.name);active.set(id,t.power);}assert([...active.values()].reduce((a,b)=>a+b,0)<=191);assert(row.after.cash>=s.reserve);assert(row.after.res.every(n=>n>=0));}assert(blocked(find("HR 530F 'Skirmisher'"),s,DATA.tasks).some(x=>x.includes('prerequisites')));});
+test('shared power and prerequisites constrain every forecast start',()=>{
+ const s=ready(),copy=structuredClone(s),f=forecast(s,DATA,now,160);assert(f.rows.length);assert.deepEqual(s,copy);
+ const done=new Set(),active=new Map();
+ for(const row of f.rows){
+  row.completes.forEach(id=>{done.add(id);active.delete(id);});
+  for(const id of row.starts){
+   const t=DATA.tasks.find(t=>t.id===id);assert(t.deps.every(d=>done.has(d)),t.name);
+   active.set(id,{power:t.power,end:row.time+t.hours*3600000});
+   assert([...active.values()].filter(x=>x.end>row.time).reduce((a,b)=>a+b.power,0)<=191);
+  }
+  assert(row.after.cash>=s.reserve);assert(row.after.res.every(n=>n>=0));
+ }
+ assert(blocked(find("HR 530F 'Skirmisher'"),s,DATA.tasks).some(x=>x.includes('prerequisites')));
+});
 test('history restores exact previous balances without nested history',()=>{const s=ready(),n=recordHistory(s,{...s,cash:25},'Gear',now);const restored=restoreHistory(n,n.history[0].id);assert.equal(restored.cash,s.cash);assert.equal(n.history[0].before.history,undefined);});

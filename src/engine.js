@@ -20,10 +20,14 @@ export function goalIds(s,tasks){
  if(s.goal==='all')return new Set(tasks.map(t=>t.id));
  const ids=new Set(),visit=id=>{if(ids.has(id))return; ids.add(id);tasks.find(t=>t.id===id)?.deps.forEach(visit);}; visit(Number(s.goal));return ids;
 }
+// Elapsed timers keep their recorded active status until confirmed, but no longer occupy power.
+export function researchPowerUsed(s,tasks,now=Date.now()){
+ return tasks.filter(t=>s.status[t.id]?.state==='active'&&!(s.status[t.id].end<=now)).reduce((sum,t)=>sum+t.power,0);
+}
 export function blocked(t,s,tasks,now=Date.now(),costsAlreadyPaid=false){
  const why=[]; if(s.status[t.id]?.state!=='todo')why.push('Already started or completed');
  if(t.deps.some(id=>s.status[id]?.state!=='done'))why.push('Complete prerequisites first');
- const power=tasks.filter(x=>s.status[x.id]?.state==='active').reduce((n,x)=>n+x.power,0);
+ const power=researchPowerUsed(s,tasks,now);
  if(power+t.power>s.power)why.push('Not enough free research power');
  if(!costsAlreadyPaid&&s.cash-t.cost<s.reserve)why.push('Cash would fall below your reserve');
  t.res.forEach((n,i)=>{if(!costsAlreadyPaid&&n>s.res[i]+1e-6)why.push(`Need ${Math.ceil(n-s.res[i])} more ${LABELS[i]}`);});
