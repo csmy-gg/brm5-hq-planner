@@ -4,10 +4,11 @@ dist/
 !.env.example
 .vercel/
 test-results/
+output/
+brm5-hq-backup-*.json
+brm5-hq-recovery-*.json
+brm5-unsynced-hq-*.json
 supabase/.temp/
 supabase/.branches/
 *.log
 *.zip
-
-.vercel
-.env*

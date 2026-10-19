@@ -66,4 +66,4 @@ The database isolation, revision checks and idempotent saves have been tested. R
 
 ## Move your existing HQ
 
-Export a backup from your [original private tracker](https://brm5-hq-planner-lukas.amberolm256.chatgpt.site). Import it on the new website, check your balances, staff, research and timers, then sign in and save that guest HQ to your account. The original tracker has not been reset or replaced.
+Export a backup from your existing tracker, then import it on the planner. Check your balances, staff, research and timers before signing in and saving that guest HQ to your account.
