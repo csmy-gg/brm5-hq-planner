@@ -1,6 +1,7 @@
 import {readPreferences,savePreferences,applyPreferences,preferenceDefaults,PREFERENCES_KEY} from './preferences.js';
 import {createTimezonePicker} from './timezone-picker.js';
-import {calendarInput,zonedTimestamp,validTimezone} from './time.js';
+import {validTimezone} from './time.js';
+import {scheduleChange} from './schedule.js';
 import {downloadJSON} from './account-ui.js';
 import {AREAS,count} from './engine.js';
 import {resourceSymbols} from './resource-ui.js';
@@ -40,7 +41,7 @@ export function createPlannerUI({getState,persistence,commit,adopt,onPreferences
     const hqEdited=JSON.stringify(fields())!==JSON.stringify(baseFields);const invalid=hqEdited?[...settings.elements].find(el=>el.willValidate&&!el.checkValidity()):null;if(invalid){selectGroup(['anchor','interval','visitMinutes','timezone'].includes(invalid.id)?2:3);invalid.reportValidity();return false;}
     const s=getState(),next=structuredClone(s);for(const id of ['power','reserve','uptime','capacity','interval','visitMinutes']){const raw=$('#'+id).value;if(raw.trim()===''||!Number.isFinite(Number(raw))||Number(raw)<0)throw Error('Enter a valid '+id+'.');next[id]=Number(raw);}
     next.timezone=$('#timezone').value;if(!validTimezone(next.timezone))throw Error('Choose a valid timezone.');next.anchor=$('#anchor').value;
-    if(next.anchor!==s.anchor)next.session.scheduled=next.anchor?zonedTimestamp(next.anchor,next.timezone):null;else if(next.timezone!==s.timezone&&next.session.scheduled!==null)next.anchor=calendarInput(next.session.scheduled,next.timezone);
+    const schedule=scheduleChange(s,next);next.anchor=schedule.anchor;next.session.scheduled=schedule.scheduled;
     next.autoCapacity=$('#auto-capacity').checked;
     const changed=['power','reserve','uptime','capacity','interval','visitMinutes','timezone','anchor','autoCapacity'].some(key=>next[key]!==s[key]);
     if(changed)commit(next,'Planning settings updated.');clearDrafts('settings');
