@@ -8,6 +8,8 @@ export function validateProfile(input,withHistory=true){
  if(s?.version!==1||!Array.isArray(s.res)||s.res.length!==4||!s.staff||!s.status)throw Error('This is not a compatible HQ backup.');
  for(const area of ['Training']){s.staff[area]??={};s.unavailable[area]??=0;}
  const finite=(n,min=0,max=Number.MAX_SAFE_INTEGER)=>typeof n==='number'&&Number.isFinite(n)&&n>=min&&n<=max;
+ if(!Object.hasOwn(s,'visitMinutes'))s.visitMinutes=5;
+ if(!finite(s.visitMinutes,0,120)||!Number.isInteger(s.visitMinutes))throw Error('Time per visit must be a whole number from 0 to 120 minutes.');
  if(!finite(s.cash)||!s.res.every(n=>finite(n))||!finite(s.snapshot)||!finite(s.power,0,10000)||!finite(s.reserve)||!finite(s.capacity)||!finite(s.uptime,0,100)||!finite(s.interval,6,168)||!(s.raid===null||finite(s.raid,0,100))||!(s.win===null||finite(s.win,0,100))||typeof s.anchor!=='string'||(s.anchor!==''&&!Number.isFinite(Date.parse(s.anchor))))throw Error('Backup contains invalid quantities or settings.');
  if(typeof s.autoCapacity!=='boolean')throw Error('Invalid storage setting.');
  if(!validTimestamp(s.snapshot)||Object.values(s.status).some(x=>x?.state==='active'&&!validTimestamp(x.end)))throw Error('Backup contains an invalid timestamp.');

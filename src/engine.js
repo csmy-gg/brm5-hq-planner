@@ -1,5 +1,6 @@
 import {createEmptyProfile} from './empty-profile.js';
 import {zonedTimestamp,validTimestamp} from './time.js';
+import {PLANNING_POLICIES,researchPlanner,productionPlan,chooseDelivery,chooseAssignments} from './planning.js';
 export const KEYS=['cm','pm','fuel','equipment'];
 export const LABELS=['Construction Materials','Precious Metals','Fuel','Equipment'];
 export const AREAS=['Operations','Delivery','Logistics','Defense','Infirmary','Training'];
@@ -76,44 +77,55 @@ export function projectStock(s,until,m){
  const free=Math.max(0,m.capacity-s.res.reduce((a,b)=>a+b,0)),total=gain.reduce((a,b)=>a+b,0),factor=total>free?free/total:1;
  return {res:s.res.map((n,i)=>n+gain[i]*factor),capped:total>free+1e-6};
 }
-export function forecast(state,data,now=Date.now(),limit=160){
- if(state.setupComplete===false||nextVisit(state)==null)return {rows:[],finished:false,finish:null,metrics:metrics(state,data.wiki),needsSetup:true};
- const s=normalizeDeliveries(stateSnapshot(state),data.wiki),tasks=tasksFor(s,data),m=metrics(s,data.wiki),ids=goalIds(s,tasks),rows=[];const scheduled=nextVisit(s),following=followingVisit(s,now);let t=Math.max(scheduled,now),finished=false;
- const need=()=>tasks.filter(x=>ids.has(x.id)&&s.status[x.id]?.state==='todo');
- const done=()=>s.goal==='cash'?s.cash>=s.target:s.goal==='resource'?s.res[s.goalResource]>=s.target:[...ids].every(id=>s.status[id]?.state==='done');
- if(done())return {rows,finished:true,finish:now,metrics:m};
+
+function simulateForecast(state,data,now,limit,policy,planner,tasks,m,ids){
+ const s=normalizeDeliveries(stateSnapshot(state),data.wiki),rows=[],scheduled=nextVisit(s),following=followingVisit(s,now);
+ const needed=()=>tasks.filter(task=>ids.has(task.id)&&s.status[task.id]?.state==='todo');
+ const achieved=()=>s.goal==='cash'?s.cash>=s.target:s.goal==='resource'?s.res[s.goalResource]>=s.target:[...ids].every(id=>s.status[id]?.state==='done');
+ if(achieved())return {rows,finished:true,finish:now,metrics:m,policy};
+ const visitMinutes=state.visitMinutes??5,maxHours=Math.max(data.wiki.deliveryHours,...tasks.map(t=>t.hours));
+ let finished=false,finish=null;
  for(let k=0;k<limit;k++){
-  if(k>0)t=following+(k-1)*s.interval*3600000;
-  // An imported visit can be valid but too close to JavaScript's final supported date.
-  if(!validTimestamp(t)||!validTimestamp(t+Math.max(data.wiki.deliveryHours,...tasks.map(task=>task.hours))*3600000))break;
-  const projected=projectStock(s,t,m);s.res=projected.res;s.snapshot=t;
-  const ready=s.ships.filter(x=>x.end<=t);const collected=ready.reduce((n,x)=>n+x.value,0);s.cash+=collected;s.ships=s.ships.filter(x=>x.end>t);
-  const completes=tasks.filter(x=>s.status[x.id]?.state==='active'&&s.status[x.id].end<=t);completes.forEach(x=>s.status[x.id]={state:'done'});
-  const before={cash:s.cash,res:[...s.res]};const starts=[];
-  // Favor research that unlocks children, then cheaper research. Shared power is checked for every start.
-  const candidates=need().sort((a,b)=>(tasks.filter(t=>t.deps.includes(b.id)).length-tasks.filter(t=>t.deps.includes(a.id)).length)||a.cost-b.cost);
-  for(const task of candidates){if(blocked(task,s,tasks,t).length)continue;const n=start(s,task.id,tasks,t);Object.assign(s,n);starts.push(task);}
-  // Ended five-second/zero-duration nodes are confirmed at the next visit, keeping dependencies gradual.
-  const remaining=need(),demand=KEYS.map((_,i)=>remaining.reduce((n,x)=>n+x.res[i],0));
-  const canSell=s.goal!=='resource'||s.goalResource!==2;
-  const fuelNeeded=Math.max(remaining.length?Math.max(...remaining.map(x=>x.res[2])):0,Math.min(demand[2],30));
-  const deliveryCapacity=freeDeliverySlots(s,data.wiki).reduce((n,x)=>n+x.capacity,0);let sold=0;if(canSell&&deliveryCapacity>0){sold=Math.max(0,Math.min(deliveryCapacity,Math.floor(s.res[2]-fuelNeeded)));if(sold)Object.assign(s,dispatch(s,2,sold,data.wiki,t));}
-  const alloc=[0,0,0,0],target=demand.map((n,i)=>Math.min(n,i===1?24:i===3?45:i===0?24:45));
-  if(s.goal==='resource')target[s.goalResource]=s.target;
-  // Each worker is assigned to the largest production-time shortage. Fuel earns future research cash.
-  const cashNeed=remaining.reduce((n,x)=>n+x.cost,0)+s.reserve-s.cash-s.ships.reduce((n,x)=>n+x.value,0);
-  if(s.goal==='cash')target[2]=Math.max(target[2],Math.ceil((s.target-s.cash-s.ships.reduce((n,x)=>n+x.value,0))/150));
-  else if(cashNeed>0)target[2]=Math.max(target[2],Math.min(90,Math.ceil(cashNeed/150)+fuelNeeded));
-  for(let n=0;n<m.ops;n++){
-   const scores=target.map((v,i)=>(v-s.res[i]-alloc[i]*m.rates[i]*s.interval/24*s.uptime/100)/Math.max(.01,m.rates[i]));
-   const best=scores.indexOf(Math.max(...scores));if(scores[best]<=0)break;alloc[best]++;
+  const scheduledTime=k===0?scheduled:following+(k-1)*state.interval*3600000;
+  const time=Math.max(scheduledTime,now,rows.at(-1)?.visitEnd??-Infinity),windowEnd=time+visitMinutes*60000;
+  if(!validTimestamp(time)||!validTimestamp(windowEnd+maxHours*3600000))break;
+  const row={time,scheduledTime,visitMinutes,starts:[],completes:[],researchSteps:[],completionSteps:[],events:[],collected:0,sold:0,delivery:null,capped:false};
+  let at=time;
+  for(let event=0;event<tasks.length*3+(s.ships?.length||0)+4;event++){
+   const projected=projectStock(s,at,m);s.res=projected.res;s.snapshot=at;row.capped||=projected.capped;
+   const arrived=s.ships.filter(ship=>ship.end<=at);row.collected+=arrived.reduce((n,ship)=>n+ship.value,0);s.cash+=arrived.reduce((n,ship)=>n+ship.value,0);for(const ship of arrived)row.events.push({type:'collect',id:ship.id,at});s.ships=s.ships.filter(ship=>ship.end>at);
+   for(const task of tasks)if(s.status[task.id]?.state==='active'&&s.status[task.id].end<=at){s.status[task.id]={state:'done'};row.completes.push(task.id);row.completionSteps.push({id:task.id,at});row.events.push({type:'research-complete',id:task.id,at});}
+   row.before??={cash:s.cash,res:[...s.res]};
+   if(achieved()){finished=true;finish=at;break;}
+   const rank=planner.ranks(s,at),eligible=needed().filter(task=>!blocked(task,s,tasks,at).length);
+   const batch=planner.select(eligible,s,Math.max(0,s.power-researchPowerUsed(s,tasks,at)),rank,policy);
+   let started=false;
+   for(const task of batch){if(blocked(task,s,tasks,at).length)continue;Object.assign(s,start(s,task.id,tasks,at));row.starts.push(task.id);row.researchSteps.push({id:task.id,at,end:s.status[task.id].end});row.events.push({type:'research-start',id:task.id,at});started=true;}
+   // Confirm instant nodes in the disposable simulation before choosing newly unlocked work.
+   if(started&&tasks.some(task=>s.status[task.id]?.state==='active'&&s.status[task.id].end<=at))continue;
+   const upcoming=[...tasks.filter(task=>s.status[task.id]?.state==='active').map(task=>s.status[task.id].end),...s.ships.map(ship=>ship.end)].filter(end=>end>at&&end<=windowEnd);
+   if(!upcoming.length)break;
+   at=Math.min(...upcoming);
   }
-  // Limit projected production to storage headroom; unused staff can rest.
-  let head=Math.max(0,m.capacity-s.res.reduce((a,b)=>a+b,0));
-  for(const i of [1,3,0,2]){const unit=m.rates[i]*s.interval/24*s.uptime/100;if(unit>0){alloc[i]=Math.min(alloc[i],Math.max(0,Math.floor((head+1e-8)/unit)));head-=alloc[i]*unit;}}
-  s.assign=alloc;
-  rows.push({time:t,scheduledTime:k===0?scheduled:t,starts:starts.map(x=>x.id),completes:completes.map(x=>x.id),collected,sold,assign:[...alloc],before,after:{cash:s.cash,res:[...s.res]},capped:projected.capped});
-  if(done()){finished=true;break;}
+  if(!finished){
+   const rank=planner.ranks(s,at),remaining=needed();let production=productionPlan(s,remaining,m,data.wiki,rank,policy);
+   const capacity=freeDeliverySlots(s,data.wiki).reduce((n,worker)=>n+worker.capacity,0),sale=chooseDelivery(s,production,capacity,data.wiki);
+   if(sale){Object.assign(s,dispatch(s,sale.resource,sale.quantity,data.wiki,at));row.delivery={...sale,at};row.sold=sale.resource===2?sale.quantity:0;row.events.push({type:'dispatch',...sale,id:s.ships.at(-1).id,at});production=productionPlan(s,remaining,m,data.wiki,rank,policy);}
+   s.assign=chooseAssignments(s,production,m);
+  }
+  row.assign=[...s.assign];row.after={cash:s.cash,res:[...s.res]};row.visitEnd=at;rows.push(row);
+  if(finished)break;
  }
- return {rows,finished,finish:finished?rows.at(-1)?.time:null,metrics:m};
+ const progress=[...ids].reduce((n,id)=>n+(s.status[id]?.state==='done'?2:s.status[id]?.state==='active'?1:0),0);
+ const targetProgress=s.goal==='cash'?s.cash:s.goal==='resource'?s.res[s.goalResource]:progress;
+ return {rows,finished,finish,metrics:m,policy,progress:targetProgress};
+}
+export function forecast(state,data,now=Date.now(),limit=160){
+ const m=metrics(state,data.wiki);
+ if(state.setupComplete===false||nextVisit(state)==null)return {rows:[],finished:false,finish:null,metrics:m,needsSetup:true};
+ const tasks=tasksFor(state,data),ids=goalIds(state,tasks),planner=researchPlanner(tasks,ids);
+ const policies=(state.goal==='cash'||state.goal==='resource')?['critical']:PLANNING_POLICIES;
+ const results=policies.map(policy=>simulateForecast(state,data,now,limit,policy,planner,tasks,m,ids));
+ results.sort((a,b)=>Number(b.finished)-Number(a.finished)||(a.finished?a.finish-b.finish:(b.progress||0)-(a.progress||0))||a.rows.filter(row=>row.delivery).length-b.rows.filter(row=>row.delivery).length||a.rows.length-b.rows.length);
+ return {...results[0],comparedPlans:results.length};
 }
