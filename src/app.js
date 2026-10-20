@@ -1,3 +1,4 @@
+import {installReleaseUpdates} from './release-updates.js';
 import {plannedStartText,plannedDelivery,plannedDeliveryText} from './forecast-ui.js';
 import {researchCountdown} from './research-timing.js';
 import {incomingSaveAction} from './save-state.js';
@@ -17,7 +18,7 @@ import {KEYS,LABELS,AREAS,clone,defaults,count,metrics,tasksFor,goalIds,blocked,
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],money=n=>'$'+Math.round(n).toLocaleString('en-US'),num=n=>(Math.floor(n*10)/10).toLocaleString('en-US'),esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const date=(t,short=false)=>t==null?'Set up your first visit':new Intl.DateTimeFormat('en-GB',{timeZone:state.timezone,weekday:short?undefined:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZoneName:'short'}).format(new Date(t));
 let state=normalizeDeliveries(defaults(DATA.tasks),DATA.wiki),filter='all',full=false,toastTimer,storageOk=true;
-let accountUI,plannerUI,lastIdentity=null,researchView=readPreferences(),deferredState=null,previousResearchLayout=null;
+let accountUI,plannerUI,releaseUpdates,releaseReloadApproved=false,lastIdentity=null,researchView=readPreferences(),deferredState=null,previousResearchLayout=null;
 filter=researchView.filter;
 const dirtyForms=new Set();let submittingForm=null,dispatchToken=crypto.randomUUID();
 function hasDrafts(){return dirtyForms.size>0||Boolean(document.querySelector('.research-timer-editor:not([hidden]),.delivery-timer-editor:not([hidden])'))||workspace?.hasDrafts||setupResearch?.hasDrafts;}
@@ -51,7 +52,7 @@ function commit(next,message){
  if(current){let latest;try{latest=validate(JSON.parse(current));}catch{throw Error('Saved progress could not be read. Reload or restore a backup before saving.');}if(latest.revision!==state.revision){state=latest;render();throw Error('Progress changed in another tab. Review the updated values and try again.');}}
  next=validate(next);const candidate=recordHistory(message==='Backup restored.'?{...state,history:next.history}:state,next,describeAction(next,message));candidate.revision=Date.now()+'-'+Math.random().toString(36).slice(2,9);
  try{persistence.save(candidate);}catch(error){storageOk=false;throw Error(error.message||'The browser could not save this action. Your recorded progress is unchanged.');}
- state=candidate;deferredState=null;$('#remote-update').hidden=true;storageOk=true;render();if(message)toast(message);return {persisted:true};
+ state=candidate;deferredState=null;$('#remote-update').hidden=true;storageOk=true;releaseUpdates?.savedForm(submittingForm);render();if(message)toast(message);return {persisted:true};
 }
 function act(fn,msg){try{return commit(fn(),msg);}catch(e){if(submittingForm)dirtyForms.add(submittingForm);toast(e.message,true);}}
 function input(id){const raw=$('#'+id).value,n=Number(raw);if(raw.trim()===''||!Number.isFinite(n)||n<0)throw Error('Enter a valid nonnegative number.');return n;}
@@ -234,4 +235,5 @@ persistence.init().catch(error=>toast(error.message,true));
 window.addEventListener('online',()=>persistence.refresh());
 window.addEventListener('focus',()=>persistence.refresh());
 setInterval(()=>{if(!document.hidden)persistence.refresh();},30000);
-window.addEventListener('beforeunload',event=>{if(persistence.pending||hasDrafts()||plannerUI?.dirty){event.preventDefault();event.returnValue='';}});
+window.addEventListener('beforeunload',event=>{if(!releaseReloadApproved&&(persistence.pending||hasDrafts()||plannerUI?.dirty)){event.preventDefault();event.returnValue='';}});
+releaseUpdates=installReleaseUpdates({current:__HQ_RELEASE_ID__,enabled:import.meta.env.PROD,reload:()=>{releaseReloadApproved=true;location.reload();},getSafety:()=>({dirty:hasDrafts()||Boolean(plannerUI?.dirty),editing:editing(),pending:persistence.pending,locked:persistence.locked,conflict:Boolean(persistence.choice),saveError:Boolean(persistence.detail),storageError:!storageOk,deferred:Boolean(deferredState)})});
