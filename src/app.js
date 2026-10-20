@@ -1,4 +1,5 @@
 import {installReleaseUpdates} from './release-updates.js';
+import {GUIDE_KEY,guideInitiallyOpen,rememberGuideState,closeGuideForUpdate} from './guide-state.js';
 import {scheduleChange} from './schedule.js';
 import {plannedStartText,plannedDelivery,plannedDeliveryText} from './forecast-ui.js';
 import {researchCountdown} from './research-timing.js';
@@ -220,12 +221,13 @@ window.addEventListener('storage',e=>{if(e.key===persistence.key&&e.newValue){tr
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)updateTimers();});
 
 // Keep guide preferences separate from HQ progress and backups.
-const guide=$('#setup-guide'),guideKey='brm5-public-guide-open';let guidePreference=null;
-try{guidePreference=localStorage.getItem(guideKey);guide.open=location.hash==='#guide'||(!state.setupComplete&&guidePreference!=='false');}catch{guide.open=true;}
-guide.addEventListener('toggle',()=>{try{localStorage.setItem(guideKey,String(guide.open));}catch{}});
-$('#guide-close').onclick=()=>{guide.open=false;guide.querySelector('summary').focus();};
+const guide=$('#setup-guide');let guidePreference=null;
+try{guidePreference=localStorage.getItem(GUIDE_KEY);}catch{}
+guide.open=guideInitiallyOpen(state.setupComplete,guidePreference,location.hash);
+if(!guide.open)rememberGuideState(false);
+guide.addEventListener('toggle',()=>rememberGuideState(guide.open));
+$('#guide-close').onclick=()=>{closeGuideForUpdate(guide);guide.querySelector('summary').focus();};
 document.querySelector('nav a[href="#guide"]').addEventListener('click',()=>{guide.open=true;});
-if(location.hash==='#guide'&&guidePreference!=='false')guide.open=true;
 
 $('#guide-export').onclick=()=>$('#export').click();
 $('#guide-import').onclick=()=>$('#import').click();
@@ -237,4 +239,4 @@ window.addEventListener('online',()=>persistence.refresh());
 window.addEventListener('focus',()=>persistence.refresh());
 setInterval(()=>{if(!document.hidden)persistence.refresh();},30000);
 window.addEventListener('beforeunload',event=>{if(!releaseReloadApproved&&(persistence.pending||hasDrafts()||plannerUI?.dirty)){event.preventDefault();event.returnValue='';}});
-releaseUpdates=installReleaseUpdates({current:__HQ_RELEASE_ID__,enabled:import.meta.env.PROD,reload:()=>{releaseReloadApproved=true;location.reload();},getSafety:()=>({dirty:hasDrafts()||Boolean(plannerUI?.dirty),editing:editing(),pending:persistence.pending,locked:persistence.locked,conflict:Boolean(persistence.choice),saveError:Boolean(persistence.detail),storageError:!storageOk,deferred:Boolean(deferredState)})});
+releaseUpdates=installReleaseUpdates({current:__HQ_RELEASE_ID__,enabled:import.meta.env.PROD,reload:()=>{closeGuideForUpdate(guide);releaseReloadApproved=true;location.reload();},getSafety:()=>({dirty:hasDrafts()||Boolean(plannerUI?.dirty),editing:editing(),pending:persistence.pending,locked:persistence.locked,conflict:Boolean(persistence.choice),saveError:Boolean(persistence.detail),storageError:!storageOk,deferred:Boolean(deferredState)})});
