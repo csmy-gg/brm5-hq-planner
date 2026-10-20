@@ -16,3 +16,7 @@ export function productionBufferText(buffer){
  const duration=hours=>{const minutes=Math.ceil(hours*60);return Math.floor(minutes/60)+'h '+minutes%60+'m';};
  return 'Raid / injury buffer: '+buffer.extra+' extra '+(buffer.extra===1?'worker':'workers')+'. The same planned stock is reached in about '+duration(buffer.bufferedHours)+' instead of '+duration(buffer.minimumHours)+'. Storage stays capped; record actual injuries and losses after a raid.';
 }
+export function replenishmentText(shipment){
+ const test=shipment?.replenishment;if(!test)return '';
+ return 'Fuel replacement check: about '+Math.floor(test.fuel)+' Fuel by the next visit, even with '+test.workerLoss+' assigned Operations staff unavailable from the start. Protects '+Math.ceil(test.protectedFuel)+' Fuel for research and retained stock. This assumes the suggested assignments and recorded uptime; larger losses can require a new plan.';
+}

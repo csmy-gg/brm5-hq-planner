@@ -54,7 +54,47 @@ export function productionPlan(state,remaining,metrics,wiki,rank,policy){
  const keep=demand.map((n,i)=>i===2?Math.min(n,Math.max(largest[i],30)):n);
  if(state.goal==='resource')keep[state.goalResource]=state.target;
  const missing=focus.length?Math.min(...focus.map(t=>t.res.reduce((n,c,i)=>n+Math.max(0,c-state.res[i]),0))):state.goal==='resource'?Math.max(0,state.target-state.res[state.goalResource]):0;
- return {primary,secondary,keep,cashNeed,spaceNeed:Math.max(0,state.res.reduce((a,b)=>a+b,0)-metrics.capacity+Math.min(missing,metrics.capacity))};
+ const researchStock=demand.map((n,i)=>Math.min(n,Math.max(largest[i],focus.reduce((sum,t)=>sum+t.res[i],0))));
+ return {primary,secondary,keep,researchStock,cashNeed,spaceNeed:Math.max(0,state.res.reduce((a,b)=>a+b,0)-metrics.capacity+Math.min(missing,metrics.capacity))};
+}
+
+// Couple a Fuel sale to its replacement staffing. These are disposable forecast
+// states; no projected production or delivery payment enters the recorded HQ.
+export function planDispatch(state,remaining,metrics,wiki,rank,policy,capacity,hours){
+ const planningState={...state,interval:Math.max(0,hours)},makePlan=s=>productionPlan(s,remaining,metrics,wiki,rank,policy);
+ const initial=makePlan(planningState),ordinary=chooseDelivery(planningState,initial,capacity,wiki);
+ const afterSale=sale=>({...planningState,res:planningState.res.map((n,i)=>n-(i===sale?.resource?sale.quantity:0)),ships:[...(state.ships||[]),...(sale?[{value:sale.value}]:[])]});
+ const result=sale=>{const next=afterSale(sale);return {sale,allocation:planAssignments(next,makePlan(next),metrics)};};
+ const baseline=result(null);
+ if(state.productionBuffer==='minimum'||state.goal==='resource'||!initial.cashNeed||capacity<=0||hours<=0||!baseline.allocation.buffer.enabled)return result(ordinary);
+ // Worst distribution of a loss of half the assigned staff: for each resource,
+ // remove those workers there first, while other resources still fill storage.
+ const lossStock=(s,assign)=>{
+  const losses=Math.ceil(assign.reduce((a,b)=>a+b,0)/2),head=Math.max(0,metrics.capacity-s.res.reduce((a,b)=>a+b,0));
+  return assign.map((_,resource)=>{
+   const gain=assign.map((n,i)=>Math.max(0,n-(i===resource?losses:0))*metrics.rates[i]*hours/24*s.uptime/100),sum=gain.reduce((a,b)=>a+b,0);
+   return s.res[resource]+gain[resource]*(sum>head?head/sum:1);
+  });
+ };
+ const baseStock=lossStock(planningState,baseline.allocation.assign);
+ const protectedStock=baseStock.map((n,i)=>Math.min(n,i===2?initial.researchStock[i]:initial.keep[i]));
+ const max=Math.max(0,Math.min(Math.floor(state.res[2]+1e-7),capacity,Math.ceil(initial.cashNeed/wiki.sellPrices.fuel)));
+ // Exhaustive for normal small shipments; bounded for unusually large imports.
+ const quantities=new Set(Array.from({length:Math.min(max,64)},(_,i)=>Math.floor(max*(64-i)/64)));
+ if(max<=64){quantities.clear();for(let n=max;n>0;n--)quantities.add(n);}
+ for(const quantity of quantities){
+  if(!quantity)continue;
+  const sale={resource:2,quantity,value:quantity*wiki.sellPrices.fuel};
+  if(ordinary&&(initial.spaceNeed?ordinary.quantity>quantity||ordinary.quantity===quantity&&ordinary.value>=sale.value:ordinary.value>=sale.value))continue;
+  const candidate=result(sale),next=afterSale(sale),stock=lossStock(next,candidate.allocation.assign);
+  if(stock.some((n,i)=>n+1e-7<protectedStock[i]))continue;
+  // A sale beyond the ordinary reserve needs actual replacement production.
+  const relaxed=quantity>Math.max(0,state.res[2]-initial.keep[2]);
+  if(relaxed&&stock[2]+1e-7<Math.min(state.res[2],initial.keep[2]))continue;
+  candidate.sale={...sale,replenishment:{hours,workerLoss:Math.ceil(candidate.allocation.assign.reduce((a,b)=>a+b,0)/2),fuel:stock[2],protectedFuel:Math.max(protectedStock[2],Math.min(state.res[2],initial.keep[2]))}};
+  return candidate;
+ }
+ return result(ordinary);
 }
 
 export function chooseDelivery(state,plan,capacity,wiki){

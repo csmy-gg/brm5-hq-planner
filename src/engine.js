@@ -1,6 +1,6 @@
 import {createEmptyProfile} from './empty-profile.js';
 import {zonedTimestamp,validTimestamp} from './time.js';
-import {PLANNING_POLICIES,researchPlanner,productionPlan,chooseDelivery,planAssignments} from './planning.js';
+import {PLANNING_POLICIES,researchPlanner,planDispatch} from './planning.js';
 export const KEYS=['cm','pm','fuel','equipment'];
 export const LABELS=['Construction Materials','Precious Metals','Fuel','Equipment'];
 export const AREAS=['Operations','Delivery','Logistics','Defense','Infirmary','Training'];
@@ -108,10 +108,11 @@ function simulateForecast(state,data,now,limit,policy,planner,tasks,m,ids){
    at=Math.min(...upcoming);
   }
   if(!finished){
-   const rank=planner.ranks(s,at),remaining=needed();let production=productionPlan(s,remaining,m,data.wiki,rank,policy);
-   const capacity=freeDeliverySlots(s,data.wiki).reduce((n,worker)=>n+worker.capacity,0),sale=chooseDelivery(s,production,capacity,data.wiki);
-   if(sale){Object.assign(s,dispatch(s,sale.resource,sale.quantity,data.wiki,at));row.delivery={...sale,at};row.sold=sale.resource===2?sale.quantity:0;row.events.push({type:'dispatch',...sale,id:s.ships.at(-1).id,at});production=productionPlan(s,remaining,m,data.wiki,rank,policy);}
-   const allocation=planAssignments(s,production,m);s.assign=allocation.assign;row.productionBuffer=allocation.buffer;
+   const rank=planner.ranks(s,at),remaining=needed(),nextTime=following+k*state.interval*3600000;
+   const capacity=freeDeliverySlots(s,data.wiki).reduce((n,worker)=>n+worker.capacity,0);
+   const {sale,allocation}=planDispatch(s,remaining,m,data.wiki,rank,policy,capacity,Math.max(0,(nextTime-at)/3600000));
+   if(sale){Object.assign(s,dispatch(s,sale.resource,sale.quantity,data.wiki,at));row.delivery={...sale,at};row.sold=sale.resource===2?sale.quantity:0;row.events.push({type:'dispatch',...sale,id:s.ships.at(-1).id,at});}
+   s.assign=allocation.assign;row.productionBuffer=allocation.buffer;
   }
   row.assign=[...s.assign];row.after={cash:s.cash,res:[...s.res]};row.visitEnd=at;rows.push(row);
   if(finished)break;
