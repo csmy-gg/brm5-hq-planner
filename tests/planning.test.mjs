@@ -17,7 +17,7 @@ test('zero-stock Cobra completes without the old CM target deadlock',()=>{
 });
 test('one worker can fill the final two storage slots instead of being rounded down to zero',()=>{
  const s=profile('12');for(const t of DATA.tasks)s.status[t.id]={state:'done'};s.status[12]={state:'todo'};s.res=[498,0,0,0];
- const plan=forecast(s,DATA,now);assert(plan.finished);assert.equal(plan.rows[0].assign[3],1);assert(plan.finish-now<=24*hour);assertForecastValid(s,plan);
+ const plan=forecast(s,DATA,now);assert(plan.finished);assert.equal(plan.rows[0].productionBuffer.base[3],1);assert.equal(plan.rows[0].assign[3],8);assert(plan.finish-now<=24*hour);assertForecastValid(s,plan);
 });
 test('goal-specific scheduling starts the long Skirmisher prerequisite early',()=>{
  const s=profile('139'),required=goalIds(s,DATA.tasks),pending=[5,156,159,1,22,8,158,17,139];

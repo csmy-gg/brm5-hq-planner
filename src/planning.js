@@ -82,3 +82,34 @@ export function chooseAssignments(state,plan,metrics){
  // The last worker may fill storage partway through the interval; projectStock caps output.
  return alloc;
 }
+
+export function planAssignments(state,plan,metrics){
+ const base=chooseAssignments(state,plan,metrics),total=base.reduce((a,b)=>a+b,0),head=Math.max(0,metrics.capacity-state.res.reduce((a,b)=>a+b,0));
+ const risk=state.uptime<100||(state.unavailable?.Operations||0)>0||(state.raid!==0&&state.win!==100);
+ const result={assign:base,buffer:{extra:0,base,enabled:state.productionBuffer!=='minimum'&&risk}};
+ const available=Math.min(metrics.ops,4000);
+ if(!result.buffer.enabled||!total||total>=available||!head)return result;
+ const units=metrics.rates.map(rate=>rate*state.interval/24*state.uptime/100);
+ const projected=assign=>{const raw=assign.map((n,i)=>n*units[i]),sum=raw.reduce((a,b)=>a+b,0),scale=sum>head?head/sum:1;return raw.map(n=>n*scale);};
+ const protectedGain=projected(base);
+ const hours=assign=>Math.max(0,...protectedGain.map((n,i)=>n?state.interval*n/(assign[i]*units[i]):0));
+ let best=base,bestHours=hours(base);
+ const consider=assign=>{
+  if(assign.some((n,i)=>!Number.isInteger(n)||n<base[i]||n>1000)||assign.reduce((a,b)=>a+b,0)>available)return;
+  // Shared storage must never crowd out any resource the minimum plan would produce.
+  if(projected(assign).some((n,i)=>n+1e-7<protectedGain[i]))return;
+  const time=hours(assign),size=assign.reduce((a,b)=>a+b,0);
+  if(time<bestHours-1e-7||(Math.abs(time-bestHours)<1e-7&&size>best.reduce((a,b)=>a+b,0))){best=assign;bestHours=time;}
+ };
+ // Exact multiples preserve the resource mix even when shared storage fills.
+ const gcd=(a,b)=>b?gcd(b,a%b):a,divisor=base.reduce(gcd,0),ratio=base.map(n=>n/divisor),ratioTotal=total/divisor;
+ const multiple=Math.min(Math.floor(available/ratioTotal),...ratio.filter(Boolean).map(n=>Math.floor(1000/n)));
+ consider(ratio.map(n=>n*multiple));
+ // Check a bounded set of nearby proportional allocations when staff cannot divide evenly.
+ for(let size=available;size>total&&size>=available-4;size--){
+  const scaled=base.map(n=>n*size/total);
+  for(let mask=0;mask<16;mask++)consider(scaled.map((n,i)=>(mask&(1<<i))?Math.ceil(n):Math.floor(n)));
+ }
+ result.assign=best;result.buffer={...result.buffer,extra:best.reduce((a,b)=>a+b,0)-total,minimumHours:hours(base),bufferedHours:bestHours};
+ return result;
+}

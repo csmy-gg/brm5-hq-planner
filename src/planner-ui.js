@@ -33,7 +33,7 @@ export function createPlannerUI({getState,persistence,commit,adopt,onPreferences
   function dirty(){return drawer.open&&base&&(JSON.stringify(fieldPreferences())!==JSON.stringify(base)||JSON.stringify(fields())!==JSON.stringify(baseFields));}
   function apply(value){applyPreferences(value);if(lastMode!==value.mode){disclosures.forEach(el=>el.open=value.mode==='advanced');lastMode=value.mode;}onPreferences(value);}
   function selectGroup(group){drawer.querySelectorAll('[data-settings-panel]').forEach(el=>el.hidden=Number(el.dataset.settingsPanel)!==group);drawer.querySelectorAll('[data-settings-group]').forEach(el=>el.setAttribute('aria-pressed',String(Number(el.dataset.settingsGroup)===group)));}
-  function fillHQ(){const s=getState();for(const id of ['power','reserve','uptime','capacity','anchor','interval','visitMinutes','timezone'])$('#'+id).value=s[id];$('#auto-capacity').checked=s.autoCapacity;$('#capacity').disabled=s.autoCapacity;$('#anchor').required=s.setupComplete;timezone.sync();}
+  function fillHQ(){const s=getState();for(const id of ['power','reserve','uptime','capacity','anchor','interval','visitMinutes','productionBuffer','timezone'])$('#'+id).value=s[id];$('#auto-capacity').checked=s.autoCapacity;$('#capacity').disabled=s.autoCapacity;$('#anchor').required=s.setupComplete;timezone.sync();}
   function open(group=0,element=null){if(drawer.open){selectGroup(group);return;}trigger=element||document.activeElement;fillPreferences(preferences);fillHQ();base=structuredClone(preferences);baseFields=fields();$('#settings-unsaved').hidden=true;message('');selectGroup(group);drawer.showModal();$('#close-settings').focus();syncStatus();}
   function close(){if(dirty()){$('#settings-unsaved').hidden=false;$('#settings-keep').focus();return;}drawer.close();}
   function discard(){apply(base||preferences);preferences=base||preferences;fillPreferences(preferences);drawer.close();}
@@ -42,8 +42,8 @@ export function createPlannerUI({getState,persistence,commit,adopt,onPreferences
     const s=getState(),next=structuredClone(s);for(const id of ['power','reserve','uptime','capacity','interval','visitMinutes']){const raw=$('#'+id).value;if(raw.trim()===''||!Number.isFinite(Number(raw))||Number(raw)<0)throw Error('Enter a valid '+id+'.');next[id]=Number(raw);}
     next.timezone=$('#timezone').value;if(!validTimezone(next.timezone))throw Error('Choose a valid timezone.');next.anchor=$('#anchor').value;
     const schedule=scheduleChange(s,next);next.anchor=schedule.anchor;next.session.scheduled=schedule.scheduled;
-    next.autoCapacity=$('#auto-capacity').checked;
-    const changed=['power','reserve','uptime','capacity','interval','visitMinutes','timezone','anchor','autoCapacity'].some(key=>next[key]!==s[key]);
+    next.productionBuffer=$('#productionBuffer').value;next.autoCapacity=$('#auto-capacity').checked;
+    const changed=['power','reserve','uptime','capacity','interval','visitMinutes','productionBuffer','timezone','anchor','autoCapacity'].some(key=>next[key]!==s[key]);
     if(changed)commit(next,'Planning settings updated.');clearDrafts('settings');
     preferences=savePreferences({...fieldPreferences(),modeChosen:true});apply(preferences);fillPreferences(preferences);fillHQ();base=structuredClone(preferences);baseFields=fields();$('#settings-unsaved').hidden=true;message('Settings saved.');if(closeAfter)drawer.close();return true;
   }catch(error){message(error.message,true);return false;}}
