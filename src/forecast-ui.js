@@ -20,3 +20,10 @@ export function replenishmentText(shipment){
  const test=shipment?.replenishment;if(!test)return '';
  return 'Fuel replacement check: about '+Math.floor(test.fuel)+' Fuel by the next visit, even with '+test.workerLoss+' assigned Operations staff unavailable from the start. Protects '+Math.ceil(test.protectedFuel)+' Fuel for research and retained stock. This assumes the suggested assignments and recorded uptime; larger losses can require a new plan.';
 }
+export function storageWarning(row,used,capacity,now,date){
+ if(capacity>0&&used>=capacity)return used>capacity?'':'Recorded storage is already full. Make room to resume production.';
+ if(row?.storageFullAt==null)return '';
+ const at=date(row.storageFullAt);
+ return row.storageFullAt<=now?'Storage is estimated to have filled at '+at+'. Check your current stock; production stops while storage is full.':
+  'Production is estimated to fill storage at '+at+'. Consider checking in before then. Based on recorded assignments and your uptime estimate.';
+}

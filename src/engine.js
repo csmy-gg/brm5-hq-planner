@@ -49,9 +49,9 @@ export function normalizeDeliveries(s,wiki){
 export function freeDeliverySlots(s,wiki){const busy=new Set((s.ships||[]).flatMap(x=>x.staffIds));return deliverySlots(s,wiki).filter(x=>!busy.has(x.id));}
 export function dispatch(s,resource,qty,wiki,now=Date.now(),alreadyReflected=false){
  const x=normalizeDeliveries(s,wiki),free=freeDeliverySlots(x,wiki),capacity=free.reduce((n,x)=>n+x.capacity,0);
- if(!Number.isInteger(resource)||resource<0||resource>3||!Number.isInteger(qty)||qty<=0||(!alreadyReflected&&qty>x.res[resource])||qty>capacity)throw Error('Choose a whole quantity within your stock and available delivery staff capacity.');
+ if(!Number.isInteger(resource)||resource<0||resource>3||!Number.isInteger(qty)||qty<=0||(!alreadyReflected&&qty>x.res[resource]+1e-7)||qty>capacity)throw Error('Choose a whole quantity within your stock and available delivery staff capacity.');
  let assigned=0;const staffIds=[];for(const worker of free){staffIds.push(worker.id);assigned+=worker.capacity;if(assigned>=qty)break;}
- if(!alreadyReflected){x.snapshot=now;x.res[resource]-=qty;}x.ships.push({id:'delivery-'+now+'-'+Math.random().toString(36).slice(2,9),staffIds,resource,quantity:qty,value:qty*wiki.sellPrices[KEYS[resource]],end:now+wiki.deliveryHours*3600000});return x;
+ if(!alreadyReflected){x.snapshot=now;x.res[resource]=Math.max(0,x.res[resource]-qty);}x.ships.push({id:'delivery-'+now+'-'+Math.random().toString(36).slice(2,9),staffIds,resource,quantity:qty,value:qty*wiki.sellPrices[KEYS[resource]],end:now+wiki.deliveryHours*3600000});return x;
 }
 export function collect(s,now=Date.now(),id,alreadyReflected=false){
  const x=clone(s),shipment=x.ships?.find(t=>id?t.id===id:t.end<=now);
@@ -75,7 +75,11 @@ export function finishSession(s,expectedScheduled,now=Date.now()){
 export function projectStock(s,until,m){
  const hours=Math.max(0,(until-s.snapshot)/3600000),gain=s.assign.map((n,i)=>n*m.rates[i]*hours/24*s.uptime/100);
  const free=Math.max(0,m.capacity-s.res.reduce((a,b)=>a+b,0)),total=gain.reduce((a,b)=>a+b,0),factor=total>free?free/total:1;
- return {res:s.res.map((n,i)=>n+gain[i]*factor),capped:total>free+1e-6};
+ const hourly=s.assign.reduce((sum,n,i)=>sum+n*m.rates[i],0)/24*s.uptime/100;
+ const fillsAt=free>0&&hourly>0?Math.ceil(s.snapshot+free/hourly*3600000):null;
+ // A full starting snapshot does not tell us when it originally filled.
+ const fullAt=validTimestamp(fillsAt)&&fillsAt<=until?fillsAt:null;
+ return {res:s.res.map((n,i)=>n+gain[i]*factor),capped:total>free+1e-6,fullAt};
 }
 
 function simulateForecast(state,data,now,limit,policy,planner,tasks,m,ids){
@@ -89,10 +93,10 @@ function simulateForecast(state,data,now,limit,policy,planner,tasks,m,ids){
   const scheduledTime=k===0?scheduled:following+(k-1)*state.interval*3600000;
   const time=Math.max(scheduledTime,now,rows.at(-1)?.visitEnd??-Infinity),windowEnd=time+visitMinutes*60000;
   if(!validTimestamp(time)||!validTimestamp(windowEnd+maxHours*3600000))break;
-  const row={time,scheduledTime,visitMinutes,starts:[],completes:[],researchSteps:[],completionSteps:[],events:[],collected:0,sold:0,delivery:null,capped:false};
+  const row={time,scheduledTime,visitMinutes,starts:[],completes:[],researchSteps:[],completionSteps:[],events:[],collected:0,sold:0,delivery:null,capped:false,storageFullAt:null};
   let at=time;
   for(let event=0;event<tasks.length*3+(s.ships?.length||0)+4;event++){
-   const projected=projectStock(s,at,m);s.res=projected.res;s.snapshot=at;row.capped||=projected.capped;
+   const projected=projectStock(s,at,m);s.res=projected.res;s.snapshot=at;row.capped||=projected.capped;row.storageFullAt??=projected.fullAt;
    const arrived=s.ships.filter(ship=>ship.end<=at);row.collected+=arrived.reduce((n,ship)=>n+ship.value,0);s.cash+=arrived.reduce((n,ship)=>n+ship.value,0);for(const ship of arrived)row.events.push({type:'collect',id:ship.id,at});s.ships=s.ships.filter(ship=>ship.end>at);
    for(const task of tasks)if(s.status[task.id]?.state==='active'&&s.status[task.id].end<=at){s.status[task.id]={state:'done'};row.completes.push(task.id);row.completionSteps.push({id:task.id,at});row.events.push({type:'research-complete',id:task.id,at});}
    row.before??={cash:s.cash,res:[...s.res]};
