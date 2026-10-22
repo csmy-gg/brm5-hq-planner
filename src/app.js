@@ -115,7 +115,7 @@ function render(){
  $('#shipment').innerHTML=deliveryMarkup;
  $('#active-deliveries').innerHTML=`<h4>Active deliveries (${state.ships.length})</h4>`+deliveryMarkup;
  $('#sale button[type="submit"]').disabled=capacity===0||Boolean(state.session.actionKeys?.includes(dispatchToken));
- $('#inventory-fields').innerHTML=['Cash (USD)',...LABELS].map((name,i)=>`<label>${name}<input id="stock-${i}" type="number" min="0" step="0.01" required value="${i?state.res[i-1]:state.cash}"></label>`).join('');$('#snapshot-label').textContent='Recorded '+date(state.snapshot,true);$('#delivery-limit').textContent=` ${free.length} staff free · ${capacity} units available`;
+ $('#inventory-fields').innerHTML=['Cash (USD)',...LABELS].map((name,i)=>`<label>${name}<input id="stock-${i}" type="number" min="0" step="${i?1:0.01}" required value="${i?state.res[i-1]:state.cash}"></label>`).join('');$('#snapshot-label').textContent='Recorded '+date(state.snapshot,true);$('#delivery-limit').textContent=` ${free.length} staff free · ${capacity} units available`;
  $('#sale-resource').innerHTML=LABELS.map((n,i)=>`<option value="${i}" ${i===2?'selected':''}>${n} (${money(DATA.wiki.sellPrices[KEYS[i]])})</option>`).join('');
  for(const k of ['power','reserve','uptime','capacity','anchor','interval','visitMinutes','productionBuffer','raid','win','timezone'])$('#'+k).value=state[k];$('#auto-capacity').checked=state.autoCapacity;$('#capacity').disabled=state.autoCapacity;
  const ranks=Object.keys(DATA.wiki.staff).reverse();$('#staff-total').textContent=AREAS.reduce((n,a)=>n+Object.values(state.staff[a]).reduce((a,b)=>a+b,0),0)+' staff';
