@@ -19,6 +19,7 @@ import {DATA,migrateResearchState} from './full-data.js';
 import {KEYS,LABELS,AREAS,clone,defaults,count,metrics,tasksFor,goalIds,blocked,start,dispatch,collect,forecast,nextVisit,projectStock,normalizeDeliveries,freeDeliverySlots,recordHistory,restoreHistory,pragueTimestamp,finishSession,researchPowerUsed} from './engine.js';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],money=n=>'$'+Math.round(n).toLocaleString('en-US'),num=n=>(Math.floor(n*10)/10).toLocaleString('en-US'),esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const date=(t,short=false,seconds=false)=>t==null?'Set up your first visit':new Intl.DateTimeFormat('en-GB',{timeZone:state.timezone,weekday:short?undefined:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',second:seconds?'2-digit':undefined,timeZoneName:'short'}).format(new Date(t));
+$('#app-version').textContent='v'+__HQ_APP_VERSION__;
 let state=normalizeDeliveries(defaults(DATA.tasks),DATA.wiki),filter='all',full=false,toastTimer,storageOk=true;
 let accountUI,plannerUI,releaseUpdates,releaseReloadApproved=false,lastIdentity=null,researchView=readPreferences(),deferredState=null,previousResearchLayout=null;
 filter=researchView.filter;

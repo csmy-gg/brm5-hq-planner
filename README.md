@@ -7,3 +7,5 @@ Enter your current HQ details and choose a goal. The planner uses research prere
 Progress saves in your browser, with optional Google or Discord sign-in to sync between devices. You can also export and import backups. This is a manual tracker; it does not connect to Roblox or perform game actions.
 
 [Open the planner](https://brm5-hq-planner.vercel.app/)
+
+[Update log](CHANGELOG.md)

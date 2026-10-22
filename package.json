@@ -1,6 +1,6 @@
 {
   "name": "brm5-hq-public",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -8,10 +8,11 @@
   },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "node scripts/check-environment.mjs && vite build",
+    "build": "node scripts/check-release.mjs && node scripts/check-environment.mjs && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "test": "node --test tests/*.test.mjs",
-    "test:database": "node --test tests/database.integration.mjs"
+    "test:database": "node --test tests/database.integration.mjs",
+    "check:release": "node scripts/check-release.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.118.0",
