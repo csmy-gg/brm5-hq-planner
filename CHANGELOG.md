@@ -8,6 +8,9 @@ Version numbers describe the size of an update: **major.minor.patch**. The first
 
 - Added this update log, linked from the repository README.
 - Added the current app version to the website footer and public build metadata.
+- Added a discreet repository and update-log section under Settings → Account & data → About this project.
+- Added an AI-assistance credit for ChatGPT and OpenAI Codex.
+- Added versioned GitHub Releases so release notes are accessible from the repository homepage.
 - Added release checks for matching package versions, dated release notes and version increases when app code changes.
 
 ## [1.0.0] — 2026-10-22
