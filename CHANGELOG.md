@@ -4,6 +4,15 @@ Short release notes for BRM5 HQ Planner, newest first. The version shown in the 
 
 Version numbers describe the size of an update: **major.minor.patch**. The first number is a large app, code or UI overhaul; the second is a noticeable user-experience improvement; the third is a small fix or subtle change. Increasing a higher number resets the lower numbers to zero.
 
+## [1.2.0] — 2026-10-24
+
+- Added specific daily visit times alongside the existing hours-between-visits schedule.
+- Added a four-visit schedule preview, time validation and daylight-saving explanations.
+- Updated research, production, delivery and raid-buffer planning to use each actual gap between visits.
+- Preserved unfinished sessions and existing schedules when switching to daily times.
+- Updated the setup guide with daily scheduling instructions.
+- Added a dismissible update message linking to Schedule settings and the Full Update Log.
+
 ## [1.1.0] — 2026-10-22
 
 - Added this update log, linked from the repository README.

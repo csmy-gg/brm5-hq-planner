@@ -1,3 +1,4 @@
+import {rememberUpdateIntent} from './update-notice.js';
 export function validRelease(value){return value?.format===1&&typeof value.id==='string'&&/^[a-zA-Z0-9-]{1,100}$/.test(value.id);}
 
 export function updateBlocker({online=true,dirty=false,editing=false,pending=false,locked=false,conflict=false,saveError=false,storageError=false,deferred=false}={}){
@@ -12,7 +13,7 @@ export function updateBlocker({online=true,dirty=false,editing=false,pending=fal
 }
 
 export function createReleaseMonitor({current,fetchRelease,online=()=>true,visible=()=>true,blocker=()=>'',onChange=()=>{},reload=()=>{},now=Date.now}={}){
- let latest=null,checking=null,updating=false,lastCheck=-Infinity,error='',stopped=false;
+ let latest=null,latestRelease=null,checking=null,updating=false,lastCheck=-Infinity,error='',stopped=false;
  const view=()=>({available:Boolean(latest&&latest!==current),reason:blocker(),checking:Boolean(checking),updating,error});
  const refresh=()=>{if(!stopped)onChange(view());};
  async function check({force=false}={}){
@@ -23,7 +24,7 @@ export function createReleaseMonitor({current,fetchRelease,online=()=>true,visib
   checking=Promise.resolve().then(fetchRelease).then(value=>{
    if(stopped)return false;
    if(!validRelease(value))throw Error('Invalid release metadata');
-   latest=value.id;error='';return true;
+   latest=value.id;latestRelease=value;error='';return true;
   }).catch(()=>{if(!stopped)error='Could not check the latest version. Try again when connected.';return false;}).finally(()=>{checking=null;refresh();});
   refresh();return checking;
  }
@@ -34,7 +35,7 @@ export function createReleaseMonitor({current,fetchRelease,online=()=>true,visib
    const checked=await check({force:true});
    if(stopped||!checked||blocker(discard)||!view().available)return false;
    // Recheck after the network request: a user may have edited or started a save meanwhile.
-   reload({discard});return true;
+   reload({discard,release:latestRelease});return true;
   }finally{updating=false;refresh();}
  }
  return {check,update,refresh,get state(){return view();},stop(){stopped=true;}};
@@ -45,7 +46,7 @@ export function installReleaseUpdates({current,enabled,getSafety,document:doc=gl
  if(!enabled||!current||current==='development')return {savedForm(){},stop(){}};
  const drafts=new Set(),online=()=>win.navigator.onLine!==false,discardButton=doc.querySelector('#release-discard-button'),dialog=doc.querySelector('#release-discard-dialog'),cancel=doc.querySelector('#release-discard-cancel'),confirm=doc.querySelector('#release-discard-confirm'),discardError=doc.querySelector('#release-discard-error');
  const safety=discard=>{const state=getSafety(),otherDialog=Boolean(doc.querySelector('dialog[open]:not(#release-discard-dialog)'));return {...state,online:online(),dirty:discard?false:Boolean(state.dirty||drafts.size),editing:discard?otherDialog:state.editing};};
- const monitor=createReleaseMonitor({current,online,visible:()=>!doc.hidden,reload,
+ const monitor=createReleaseMonitor({current,online,visible:()=>!doc.hidden,reload:options=>{try{rememberUpdateIntent(win.sessionStorage,options.release);}catch{}reload(options);},
   fetchRelease:async()=>{
    const response=await read('/version.json',{cache:'no-store',credentials:'same-origin',redirect:'error',signal:AbortSignal.timeout(10000)});
    if(!response.ok)throw Error('Release check failed');
