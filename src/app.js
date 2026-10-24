@@ -238,7 +238,7 @@ $('#finish-setup').onclick=()=>{const result=act(()=>{const n=clone(state);if(n.
 accountUI=createAccountUI({persistence,getState:()=>state,toast});accountUI.render();
 const updateNotice=installUpdateNotice({version:__HQ_APP_VERSION__,current:__HQ_RELEASE_ID__,onSettings:()=>plannerUI.open(2)});
 updateNotice.consider(state);
-persistence.init().then(()=>updateNotice.consider(state)).catch(error=>toast(error.message,true));
+persistence.init().then(()=>updateNotice.consider(state,{settled:true})).catch(error=>toast(error.message,true));
 window.addEventListener('online',()=>persistence.refresh());
 window.addEventListener('focus',()=>persistence.refresh());
 setInterval(()=>{if(!document.hidden)persistence.refresh();},30000);

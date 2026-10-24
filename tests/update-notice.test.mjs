@@ -19,3 +19,8 @@ test('unavailable or malformed notice storage never prevents loading or updating
  const broken={getItem(){throw Error('blocked');},setItem(){throw Error('blocked');},removeItem(){throw Error('blocked');}};
  assert.doesNotThrow(()=>rememberUpdateIntent(broken,{id:'new'}));assert.equal(consumeUpdateNotice({version:'1.2.1',current:'new',local:broken,session:broken}),false);
 });
+test('new users completing setup on 1.2 do not receive the legacy migration notice later',()=>{
+ const local=storage(),session=storage(),options={version:'1.2.0',current:'build12',local,session};
+ assert.equal(consumeUpdateNotice({...options,existing:false,settled:true}),false);
+ assert.equal(consumeUpdateNotice({...options,existing:true}),false);
+});
