@@ -14,7 +14,7 @@ export function createPersistence({validate,empty,onChange=()=>{},onStatus=()=>{
  function persist(e){storage.setItem(activeKey(),JSON.stringify(e));envelope=e;}
  function fresh(profile=empty()){return {format:1,profile:validate(profile),baseRevision:0,dirty:false,mutationId:token()};}
  function notify(reason='remote'){onChange(copy(envelope.profile),{reason});listeners();}
- function changedGuest(){const e=read(guestKey);return e&&(e.profile.setupComplete||e.profile.history?.length||e.profile.cash||e.profile.res.some(Boolean)||Object.values(e.profile.status).some(x=>x.state!=='todo')||Object.values(e.profile.staff).some(a=>Object.values(a).some(Boolean)))?e:null;}
+ function changedGuest(){const e=read(guestKey);return e&&(e.profile.setupComplete||e.profile.schedule?.mode==='daily'||e.profile.history?.length||e.profile.cash||e.profile.res.some(Boolean)||Object.values(e.profile.status).some(x=>x.state!=='todo')||Object.values(e.profile.staff).some(a=>Object.values(a).some(Boolean)))?e:null;}
  function guestDecision(){const guest=changedGuest()?.profile;return guest?(typeof guest.revision==='string'&&guest.revision?guest.revision:saveSignature(guest)):null;}
  function setChoice(kind,remote){choice={kind,remote,local:copy(envelope.profile),guest:changedGuest()?.profile||null};listeners();}
  function recover(remote,local){

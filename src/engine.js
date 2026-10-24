@@ -1,6 +1,7 @@
 import {createEmptyProfile} from './empty-profile.js';
 import {zonedTimestamp,validTimestamp} from './time.js';
 import {PLANNING_POLICIES,researchPlanner,planDispatch} from './planning.js';
+import {nextScheduledVisit} from './schedule.js';
 export const KEYS=['cm','pm','fuel','equipment'];
 export const LABELS=['Construction Materials','Precious Metals','Fuel','Equipment'];
 export const AREAS=['Operations','Delivery','Logistics','Defense','Infirmary','Training'];
@@ -66,11 +67,12 @@ export function restoreHistory(s,id){const entry=s.history?.find(x=>x.id===id);i
 export const pragueTimestamp=input=>zonedTimestamp(input,'Europe/Prague');
 export function nextVisit(s){return s.session?.scheduled??(s.anchor?zonedTimestamp(s.anchor,s.timezone||'Europe/Prague'):null);}
 export function followingVisit(s,now=Date.now()){
- const current=nextVisit(s),step=s.interval*3600000;return current+Math.max(1,Math.floor((now-current)/step)+1)*step;
+ const current=nextVisit(s);return current===null?null:nextScheduledVisit(s,Math.max(current,now),{previous:current}).time;
 }
 export function finishSession(s,expectedScheduled,now=Date.now()){
  const scheduled=nextVisit(s);if(scheduled==null)throw Error('Finish setup before completing a session.');if(scheduled!==expectedScheduled)throw Error('This session has already advanced. Review the current session.');
- const x=clone(s);x.session={scheduled:followingVisit(s,now),completed:[...(s.session?.completed||[]),{scheduled,finishedAt:now}].slice(-200)};return x;
+ const following=followingVisit(s,now);if(following===null)throw Error('No supported future visit. Update your schedule before finishing.');
+ const x=clone(s);x.session={scheduled:following,completed:[...(s.session?.completed||[]),{scheduled,finishedAt:now}].slice(-200)};return x;
 }
 export function projectStock(s,until,m){
  const hours=Math.max(0,(until-s.snapshot)/3600000),gain=s.assign.map((n,i)=>n*m.rates[i]*hours/24*s.uptime/100);
@@ -83,17 +85,18 @@ export function projectStock(s,until,m){
 }
 
 function simulateForecast(state,data,now,limit,policy,planner,tasks,m,ids){
- const s=normalizeDeliveries(stateSnapshot(state),data.wiki),rows=[],scheduled=nextVisit(s),following=followingVisit(s,now);
+ const s=normalizeDeliveries(stateSnapshot(state),data.wiki),rows=[],scheduled=nextVisit(s);
+ let occurrence={time:scheduled,warnings:[]};
  const needed=()=>tasks.filter(task=>ids.has(task.id)&&s.status[task.id]?.state==='todo');
  const achieved=()=>s.goal==='cash'?s.cash>=s.target:s.goal==='resource'?s.res[s.goalResource]>=s.target:[...ids].every(id=>s.status[id]?.state==='done');
  if(achieved())return {rows,finished:true,finish:now,metrics:m,policy};
  const visitMinutes=state.visitMinutes??5,maxHours=Math.max(data.wiki.deliveryHours,...tasks.map(t=>t.hours));
  let finished=false,finish=null;
  for(let k=0;k<limit;k++){
-  const scheduledTime=k===0?scheduled:following+(k-1)*state.interval*3600000;
+  const scheduledTime=occurrence.time;if(scheduledTime===null)break;
   const time=Math.max(scheduledTime,now,rows.at(-1)?.visitEnd??-Infinity),windowEnd=time+visitMinutes*60000;
   if(!validTimestamp(time)||!validTimestamp(windowEnd+maxHours*3600000))break;
-  const row={time,scheduledTime,visitMinutes,starts:[],completes:[],researchSteps:[],completionSteps:[],events:[],collected:0,sold:0,delivery:null,capped:false,storageFullAt:null};
+  const row={time,scheduledTime,scheduleWarnings:occurrence.warnings,visitMinutes,starts:[],completes:[],researchSteps:[],completionSteps:[],events:[],collected:0,sold:0,delivery:null,capped:false,storageFullAt:null};
   let at=time;
   for(let event=0;event<tasks.length*3+(s.ships?.length||0)+4;event++){
    const projected=projectStock(s,at,m);s.res=projected.res;s.snapshot=at;row.capped||=projected.capped;row.storageFullAt??=projected.fullAt;
@@ -111,8 +114,9 @@ function simulateForecast(state,data,now,limit,policy,planner,tasks,m,ids){
    if(!upcoming.length)break;
    at=Math.min(...upcoming);
   }
+  occurrence=nextScheduledVisit(s,Math.max(scheduledTime,at),{previous:time});
   if(!finished){
-   const rank=planner.ranks(s,at),remaining=needed(),nextTime=following+k*state.interval*3600000;
+   const rank=planner.ranks(s,at),remaining=needed(),nextTime=occurrence.time??at;
    const capacity=freeDeliverySlots(s,data.wiki).reduce((n,worker)=>n+worker.capacity,0);
    const {sale,allocation}=planDispatch(s,remaining,m,data.wiki,rank,policy,capacity,Math.max(0,(nextTime-at)/3600000));
    if(sale){Object.assign(s,dispatch(s,sale.resource,sale.quantity,data.wiki,at));row.delivery={...sale,at};row.sold=sale.resource===2?sale.quantity:0;row.events.push({type:'dispatch',...sale,id:s.ships.at(-1).id,at});}

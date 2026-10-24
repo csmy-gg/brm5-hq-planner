@@ -14,6 +14,23 @@ function fake(db,id){let who=id,change;const client={
 }
 function device(db,id,storage=memory(),observe=()=>{}){const client=fake(db,id);let state;const p=createPersistence({validate:validateProfile,empty,client,storage,onChange:(s,context)=>{state=s;observe(s,context);}});state=p.load();return {p,client,storage,get state(){return state;},edit(cash){const n={...state,cash,revision:crypto.randomUUID()};p.save(n);state=n;return n;}};}
 async function init(d){await d.p.init();if(d.p.choice?.kind==='new')await d.p.resolve('empty');}
+
+test('daily schedule survives guest reload and account sync without changing pending deadlines',async()=>{
+ const db=backend(),guest=device(db,null);await guest.p.init();
+ const profile={...guest.state,schedule:{mode:'daily',times:['14:00','20:00']},anchor:'2026-10-24T14:00',session:{scheduled:Date.parse('2026-10-24T14:00Z'),completed:[]},revision:crypto.randomUUID()};
+ guest.p.save(profile);const reopened=device(db,null,guest.storage);assert.deepEqual(reopened.state.schedule,profile.schedule);assert.equal(reopened.state.session.scheduled,profile.session.scheduled);
+ await reopened.p.init();await reopened.client.emit('daily-owner');await reopened.p.resolve('guest');
+ const other=device(db,'daily-owner');await init(other);assert.deepEqual(other.state.schedule,profile.schedule);assert.equal(other.state.session.scheduled,profile.session.scheduled);
+ other.edit(123);await tick();await reopened.p.refresh();assert.deepEqual(reopened.state.schedule,profile.schedule);
+});
+
+test('conflicting daily schedules preserve both versions for explicit resolution',async()=>{
+ const db=backend(),a=device(db,'daily-conflict');await init(a);const b=device(db,'daily-conflict');await init(b);
+ a.p.save({...a.state,schedule:{mode:'daily',times:['14:00','20:00']},revision:crypto.randomUUID()});await tick();
+ b.p.save({...b.state,schedule:{mode:'daily',times:['10:00']},revision:crypto.randomUUID()});await tick();
+ assert.equal(b.p.choice.kind,'conflict');assert.deepEqual(b.p.choice.remote.profile.schedule.times,['14:00','20:00']);assert.deepEqual(b.p.choice.local.schedule.times,['10:00']);
+ await b.p.resolve('cloud');assert.deepEqual(b.state.schedule.times,['14:00','20:00']);
+});
 test('guest save persists and reloads without using cloud',async()=>{const db=backend(),d=device(db,null);await d.p.init();d.edit(321);assert.equal(d.p.status,'Saved in this browser');const other=device(db,null,d.storage);assert.equal(other.state.cash,321);assert.equal(db.writes,0);});
 test('guest import is an explicit choice and sign-out restores the separate guest HQ',async()=>{const db=backend(),d=device(db,null);await d.p.init();d.edit(456);await d.client.emit('alice');assert.equal(d.p.choice.kind,'new');assert.equal(d.p.choice.guest.cash,456);assert.throws(()=>d.edit(12),/Review/);await d.p.resolve('guest');assert.equal(db.rows.get('alice').profile.cash,456);d.edit(789);await tick();await d.p.signOut();assert.equal(d.state.cash,456);assert.equal(d.p.user,null);});
 test('two devices load the same account and refresh newer saved progress',async()=>{const db=backend(),a=device(db,'alice');await init(a);a.edit(123);await tick();const b=device(db,'alice');await init(b);assert.equal(b.state.cash,123);b.edit(456);await tick();await a.p.refresh();assert.equal(a.state.cash,456);assert.equal(a.p.status,'Saved to account');});

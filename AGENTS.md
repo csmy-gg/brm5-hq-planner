@@ -1,5 +1,7 @@
 # App releases
 
+Before future production updates, give the user a working isolated guest-only preview with no production account access and wait for their go-ahead. Apply this to scheduled maintenance fixes too: prepare and test the fix, share the preview, then wait before merging to the production branch or deploying. The user explicitly exempted the 1.2.0 daily scheduling release from this new review gate; its already-approved preview-to-production rollout may proceed.
+
 For every app release, update `package.json`, both root versions in `package-lock.json`, and prepend a dated entry to `CHANGELOG.md` before publishing. Follow the user's update-size scale: the first number increases for a large overhaul that substantially changes the app, code or UI; the second increases for a medium, noticeable user-experience improvement; the third increases for a small fix or subtle change. Reset lower numbers when a higher number increases (1.1.3 → 1.2.0, 1.2.3 → 2.0.0). Do not restrict major increases to incompatible changes. Use the current Europe/Prague calendar date. List each user-visible addition or fix as a separate short, descriptive bullet; do not publish placeholders or invent historical versions.
 
 The package version is the single source for the visible app version and `version.json`. Keep the separate unique build ID used by update detection. App versions are not HQ profile-schema or research-catalogue versions; a release must not reset or migrate players' progress just to change its version.

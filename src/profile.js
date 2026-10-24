@@ -1,6 +1,7 @@
 import {DATA,migrateResearchState} from './full-data.js';
 import {clone,defaults,AREAS,count,normalizeDeliveries,metrics} from './engine.js';
 import {validTimezone,zonedTimestamp,validTimestamp} from './time.js';
+import {validateSchedule} from './schedule.js';
 export function validateProfile(input,withHistory=true){
  let s=clone(input);const legacy=s?.profileSchemaVersion==null;
  if(legacy){s.timezone='Europe/Prague';s.setupComplete=true;s.profileSchemaVersion=2;}
@@ -12,6 +13,7 @@ export function validateProfile(input,withHistory=true){
  if(!Object.hasOwn(s,'productionBuffer'))s.productionBuffer='auto';
  if(!['auto','minimum'].includes(s.productionBuffer))throw Error('Choose a valid production staffing mode.');
  if(!finite(s.visitMinutes,0,120)||!Number.isInteger(s.visitMinutes))throw Error('Time per visit must be a whole number from 0 to 120 minutes.');
+ s.schedule=validateSchedule(s.schedule,s.visitMinutes);
  if(!finite(s.cash)||!s.res.every(n=>finite(n))||!finite(s.snapshot)||!finite(s.power,0,10000)||!finite(s.reserve)||!finite(s.capacity)||!finite(s.uptime,0,100)||!finite(s.interval,6,168)||!(s.raid===null||finite(s.raid,0,100))||!(s.win===null||finite(s.win,0,100))||typeof s.anchor!=='string'||(s.anchor!==''&&!Number.isFinite(Date.parse(s.anchor))))throw Error('Backup contains invalid quantities or settings.');
  if(typeof s.autoCapacity!=='boolean')throw Error('Invalid storage setting.');
  if(!validTimestamp(s.snapshot)||Object.values(s.status).some(x=>x?.state==='active'&&!validTimestamp(x.end)))throw Error('Backup contains an invalid timestamp.');
