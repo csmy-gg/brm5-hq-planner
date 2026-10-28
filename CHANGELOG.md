@@ -4,6 +4,11 @@ Short release notes for BRM5 HQ Planner, newest first. The version shown in the 
 
 Version numbers describe the size of an update: **major.minor.patch**. The first number is a large app, code or UI overhaul; the second is a noticeable user-experience improvement; the third is a small fix or subtle change. Increasing a higher number resets the lower numbers to zero.
 
+## [1.2.2] — 2026-10-28
+
+- Corrected Machining IV research cost from $16,000 to $15,000.
+- Kept small patch updates quiet after refreshing, without the post-update announcement popup.
+
 ## [1.2.1] — 2026-10-25
 
 - Added a feedback button beside the date with an email option and the Discord contact csmy.

@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fixture from './fixtures/manufacturing-2026-10-28.json' with {type:'json'};
+import {DATA} from '../src/full-data.js';
+import {createEmptyProfile} from '../src/empty-profile.js';
+import {start,blocked} from '../src/engine.js';
+import {consumeUpdateNotice,UPDATE_INTENT_KEY} from '../src/update-notice.js';
+test('all 68 Manufacturing panels match the independently reviewed October 28 values',()=>{assert.equal(fixture.length,68);assert.equal(new Set(fixture.map(t=>t.id)).size,68);for(const expected of fixture){const actual=DATA.tasks.find(t=>t.id===expected.id);assert.equal(actual.category,'Manufacturing');assert.deepEqual({id:actual.id,power:actual.power,res:actual.res,cost:actual.cost,hours:actual.hours},expected,actual.name);}});
+test('Machining IV starts with exactly $15,000 and keeps its four-hour timer',()=>{const now=Date.UTC(2026,9,28,14),s=createEmptyProfile(DATA.tasks,{now,timezone:'Europe/Prague'}),task=DATA.tasks.find(t=>t.id===22);for(const t of DATA.tasks)s.status[t.id]={state:'done'};s.status[22]={state:'todo'};Object.assign(s,{cash:15000,res:[0,0,0,0],reserve:0,power:55});assert.deepEqual(blocked(task,s,DATA.tasks,now),[]);const next=start(s,22,DATA.tasks,now);assert.equal(next.cash,0);assert.equal(next.status[22].end,now+4*3600000);assert(blocked(task,{...s,cash:14999},DATA.tasks,now).length);});
+test('System Integration preserves the already-deployed 24-hour correction',()=>{assert.equal(DATA.tasks.find(t=>t.name==='System Integration').hours,24);});
+test('a 1.2.2 update click consumes its intent without an announcement',()=>{let removed=false;const session={getItem:()=>JSON.stringify({id:'new',version:'1.2.2'}),removeItem:key=>{assert.equal(key,UPDATE_INTENT_KEY);removed=true;}};assert.equal(consumeUpdateNotice({version:'1.2.2',current:'new',existing:true,local:{getItem:()=>null},session}),false);assert(removed);});

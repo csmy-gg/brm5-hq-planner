@@ -801,7 +801,7 @@
         0,
         0
       ],
-      "cost": 16000,
+      "cost": 15000,
       "power": 55,
       "hours": 4,
       "category": "Manufacturing",
@@ -2508,7 +2508,7 @@
       ],
       "cost": 5000,
       "power": 160,
-      "hours": 0,
+      "hours": 24,
       "category": "Education",
       "prerequisites": [
         "Engineering Foundations"

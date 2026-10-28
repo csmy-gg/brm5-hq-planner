@@ -6,6 +6,7 @@ export function consumeUpdateNotice({version,current,existing,local,session,sett
  try{const raw=session?.getItem(UPDATE_INTENT_KEY);intent=raw?JSON.parse(raw):null;}catch{}
  try{seen=local?.getItem(UPDATE_NOTICE_KEY);}catch{}
  const clicked=intent?.id===current;
+ if(version!=='1.2.0'){if(clicked)try{session?.removeItem(UPDATE_INTENT_KEY);}catch{}return false;}
  // 1.1.0 did not record update clicks. Existing HQs get this release's notice
  // once on arrival; later refreshes require an explicit update intent.
  const firstSchedulingRelease=version==='1.2.0'&&existing&&seen!==version;

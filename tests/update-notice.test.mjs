@@ -12,7 +12,7 @@ test('existing 1.1 users see scheduling notice once; new visitors and ordinary l
 test('update-button intent survives reload and is consumed only by the matching build',()=>{
  const local=storage(),session=storage();rememberUpdateIntent(session,{id:'new',version:'1.2.1'});
  assert.equal(consumeUpdateNotice({version:'1.2.1',current:'old',local,session,existing:true}),false);assert(session.getItem(UPDATE_INTENT_KEY));
- assert.equal(consumeUpdateNotice({version:'1.2.1',current:'new',local,session,existing:true}),true);assert.equal(session.getItem(UPDATE_INTENT_KEY),null);
+ assert.equal(consumeUpdateNotice({version:'1.2.1',current:'new',local,session,existing:true}),false);assert.equal(session.getItem(UPDATE_INTENT_KEY),null);
  assert.equal(consumeUpdateNotice({version:'1.2.1',current:'new',local,session,existing:true}),false);
 });
 test('unavailable or malformed notice storage never prevents loading or updating',()=>{
