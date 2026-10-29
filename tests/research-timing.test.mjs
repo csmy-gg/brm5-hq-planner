@@ -9,6 +9,20 @@ import {researchCountdown} from '../src/research-timing.js';
 const now=Date.UTC(2026,9,19,12),surface=14,internal=13,dimensional=12;
 function fixture(){const s=createEmptyProfile(DATA.tasks,{now});s.power=40;s.cash=10000;s.res=[100,100,100,100];for(const t of DATA.tasks)s.status[t.id]={state:'done'};for(const id of [surface,internal,dimensional])s.status[id]={state:'todo'};return s;}
 
+test('System Integration occupies power for 24 hours and cannot finish within its starting visit',()=>{
+ const task=DATA.tasks.find(t=>t.name==='System Integration'),day=24*3600000;
+ const s=fixture();for(const t of DATA.tasks)s.status[t.id]={state:'done'};
+ s.status[task.id]={state:'todo'};s.power=191;s.goal=String(task.id);s.setupComplete=true;
+ s.anchor='2026-10-19T14:00';s.session.scheduled=now;s.capacity=500;s.autoCapacity=false;
+ const active=start(s,task.id,DATA.tasks,now);
+ assert.equal(active.status[task.id].end,now+day);
+ assert.equal(researchPowerUsed(active,DATA.tasks,now+day-1),task.power);
+ assert.equal(researchPowerUsed(active,DATA.tasks,now+day),0);
+ const plan=forecast(s,DATA,now);
+ assert.equal(plan.finished,true);assert.equal(plan.finish,now+day);
+ assert(plan.rows[0].starts.includes(task.id));assert(!plan.rows[0].completes.includes(task.id));
+});
+
 test('two five-second research timers release power at their exact deadlines without claiming completion',()=>{
  let s=fixture();s=start(s,surface,DATA.tasks,now);s=start(s,internal,DATA.tasks,now+1000);
  const original=structuredClone(s);

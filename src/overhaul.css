@@ -67,3 +67,90 @@ body{font-size:.9375rem;line-height:1.65}p,li,label,h1,h2,h3,h4,a,button{overflo
 
 .feedback-discord .discord-badge{display:flex;align-items:center;gap:.6rem;width:fit-content;margin-top:.65rem;padding:.6rem .85rem;border:1px solid #555b66;border-radius:.6rem;background:#2b2d31;color:#f2f3f5}.discord-badge img{display:block;flex-shrink:0}.feedback-discord .discord-badge strong{font-size:.95rem;font-weight:600}
 .date-actions #feedback-button,.date-actions #today-date{white-space:nowrap}
+
+/* Seasonal palette includes every shared surface and the sidebar. */
+:root[data-theme=halloween]{color-scheme:dark;--bg:#17131b;--surface:#241e29;--subtle:#342a37;--ink:#fff3e3;--muted:#d1c1d3;--line:#8c748b;--green:#ffc078;--dark:#413047;--accent:#ffc078;--focus:#fff0a8;--danger:#ffb4b4;--orange:#ffc078;--sidebar-bg:#19131d;--sidebar-ink:#fff3e3;--sidebar-muted:#d1c1d3;--sidebar-line:#8c748b;--sidebar-active:#413047;--sidebar-accent:#ffc078}
+.seasonal-choices{margin-top:1rem;padding-top:.75rem;border-top:1px solid var(--line)}
+.seasonal-choices p{font-size:.875rem}
+.seasonal-invitation{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.5rem;padding:1rem;border:1px solid var(--line);border-radius:.85rem;background:var(--surface);color:var(--ink)}
+.seasonal-invitation p{margin:.25rem 0 0}
+.seasonal-actions{display:flex;gap:.5rem;flex-wrap:wrap;flex-shrink:0}
+.seasonal-invitation button{min-width:44px}
+.seasonal-invitation [aria-label]{font-size:1.2rem}
+@media(max-width:850px){.seasonal-invitation{align-items:stretch;flex-direction:column}.seasonal-actions{flex-wrap:wrap}}
+
+/* Focused daily view: the same forms and action handlers remain the source of truth. */
+.easy-only{display:none}
+:root[data-ui-mode=easy] .easy-only{display:block}
+:root[data-ui-mode=easy] .easy-nav-secondary,:root[data-ui-mode=easy] #today>#stats,:root[data-ui-mode=easy] #today>#goal-progress,:root[data-ui-mode=easy] #today>.two-col,:root[data-ui-mode=easy] .advanced-control{display:none}
+:root[data-ui-mode=easy] #plan,:root[data-ui-mode=easy] #history{display:none}
+:root[data-ui-mode=easy][data-easy-target=plan] #plan,:root[data-ui-mode=easy][data-easy-target=history] #history{display:block}
+:root[data-ui-mode=easy] #plan>.easy-details,:root[data-ui-mode=easy] #plan>.section-heading,:root[data-ui-mode=easy] #staff>.section-heading{display:none}
+:root[data-ui-mode=easy] .hero{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+:root[data-ui-mode=easy] .hero-copy,:root[data-ui-mode=easy] .hero-goal{padding:1.4rem;background:none}
+:root[data-ui-mode=easy] .hero h2{font-size:1.65rem}
+:root[data-ui-mode=easy] .hero-copy p{margin-bottom:.8rem;max-width:none}
+:root[data-ui-mode=easy] .hero-actions>a{display:none}
+:root[data-ui-mode=easy] .hero-complete{background:var(--green);color:#24321c;min-height:44px}
+:root[data-ui-mode=easy] #goal-needs,:root[data-ui-mode=easy] .hero-goal>small{display:none}
+#easy-goal-summary progress{width:100%;height:.5rem;margin-top:.8rem}
+#easy-goal-summary p{font-size:.85rem;margin:.5rem 0 0;color:var(--muted)}
+.daily-card-heading{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.1rem}
+.daily-card-heading h3,.daily-columns h3{margin:0 0 .4rem;font-size:1.05rem}
+.balance-strip{display:grid;grid-template-columns:1.45fr repeat(4,minmax(0,1fr));gap:1rem}
+.balance-strip>div{min-width:0}
+.balance-strip span,.balance-strip small{display:block;color:var(--muted);font-size:.78rem}
+.balance-strip strong{display:block;font:700 1.5rem Manrope,sans-serif;margin:.2rem 0;overflow-wrap:anywhere}
+.daily-capacity{color:var(--muted);font-size:.8rem;border-top:1px solid var(--line);padding-top:.8rem;margin:.9rem 0 0}
+.daily-columns{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.daily-columns article{padding:.9rem 0;border-top:1px solid var(--line);font-size:.9rem}
+.daily-columns article:first-of-type{margin-top:.8rem}
+.daily-columns article p{color:var(--muted);font-size:.85rem;margin:.35rem 0}
+.daily-upcoming article{display:flex;justify-content:space-between;gap:1rem;align-items:center}
+.daily-upcoming article span{display:block;color:var(--muted);font-size:.8rem;margin-top:.3rem}
+.daily-upcoming article button{flex-shrink:0;font-size:.8rem}
+.plan-calculation:empty,#forecast-status:empty{display:none}
+#forecast-status{min-height:1.25rem;margin-top:-.5rem;margin-bottom:.5rem;font-size:.85rem}
+.recent-changes,.advanced-gate{border:1px solid var(--line);border-radius:.7rem;padding:1rem;margin-bottom:2rem;background:var(--surface)}
+.recent-changes p small{display:block;color:var(--muted)}
+.department-picker{margin-bottom:1rem}
+:root[data-ui-mode=easy] #staff-table thead,:root[data-ui-mode=easy] #staff-table tbody tr:not(.selected-department){display:none}
+:root[data-ui-mode=easy] #staff-table,:root[data-ui-mode=easy] #staff-table tbody{display:block}
+:root[data-ui-mode=easy] #staff-table tbody tr.selected-department{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem}
+:root[data-ui-mode=easy] #staff-table td{display:block;min-width:0;padding:.5rem 0;border:0}
+:root[data-ui-mode=easy] #staff-table td:first-child{grid-column:1/-1;font-size:1rem}
+:root[data-ui-mode=easy] #staff-table td:not(:first-child)::before{content:attr(data-label);display:block;color:var(--muted);font-size:.8rem;margin-bottom:.3rem}
+:root[data-ui-mode=easy] #staff-table input{min-height:44px;text-align:left}
+.assignment-comparison{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:.8rem 0}
+.assignment-comparison>div{padding:.8rem;border:1px solid var(--line);border-radius:.5rem;background:var(--surface)}
+.assignment-comparison span,.assignment-comparison strong{display:block}
+.assignment-comparison span{font-size:.8rem;color:var(--muted)}
+.assignment-state,.ws-plan-note{font-size:.85rem;color:var(--accent)}
+:root[data-ui-mode=easy] .ws-card>.ws-section-title p{font-size:.85rem}
+.stats{grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr))}
+.cash-balance-footer{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
+.cash-balance-footer small{flex:1 1 8rem}
+.cash-balance-footer button{margin:0;flex-shrink:0}
+@media(max-width:850px){:root[data-ui-mode=easy] .hero,.daily-columns{grid-template-columns:1fr}.daily-columns{gap:0}.balance-strip{grid-template-columns:repeat(4,minmax(0,1fr))}.balance-strip>div:first-child{grid-column:1/-1}.hero-goal{border-left:0;border-top:1px solid var(--line)}}
+@media(max-width:450px){.balance-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.balance-strip strong{font-size:1.25rem}.daily-upcoming article{align-items:flex-start;flex-wrap:wrap}.assignment-comparison{grid-template-columns:1fr}:root[data-ui-mode=easy] #staff-table tbody tr.selected-department{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* The daily overview uses the existing stock form and save safeguards. */
+.daily-balances .inventory-grid{display:grid;grid-template-columns:1.35fr repeat(4,minmax(0,1fr));gap:.75rem}.daily-balances .inventory-grid label{border:1px solid var(--line);background:var(--surface-2);border-radius:.8rem;padding:.8rem;min-width:0;display:flex;flex-direction:column;gap:.5rem;color:var(--text)}.daily-balances input{width:100%;min-width:0;font-weight:700;font-size:1.2rem}.daily-balances #inventory>p{margin:.7rem 0}.daily-balances #inventory>button{margin-left:auto;display:flex}.daily-balances .daily-card-heading{margin-bottom:1rem}
+@media(max-width:1100px){.daily-balances .inventory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.daily-balances .inventory-grid label:first-child{grid-column:1/-1}}
+
+.daily-balances #inventory{border:0;background:transparent;padding:0;box-shadow:none}.daily-balances #inventory-fields label{justify-content:space-between;gap:.35rem}.daily-balances .resource-label-icon{display:none}.daily-balances #inventory-fields input{border-color:transparent;background:transparent;box-shadow:none;padding:.25rem 0;border-radius:0}.daily-balances #inventory-fields input:hover{border-bottom-color:var(--line)}.daily-balances #inventory-fields input:focus-visible{outline-offset:2px}.daily-balances #inventory-fields label{font-size:.82rem;line-height:1.4}
+
+.daily-balances #inventory-fields input{border:0;border-top:1px solid var(--line);padding-top:.65rem;margin-top:.35rem}.daily-balances #inventory-fields input:hover{border-bottom:0}
+
+@media(max-width:600px){:root[data-text-size="150"] .daily-balances .inventory-grid{grid-template-columns:1fr}.daily-balances #inventory-fields label{overflow-wrap:normal}}
+
+.daily-balances #inventory-fields input:focus-visible{outline:none;box-shadow:inset 0 -2px 0 var(--muted);border-top-color:var(--line);border-radius:0}
+
+/* Keep the date, selected-zone abbreviation and save status together. */
+.topbar .date-box{display:grid;grid-template-columns:auto auto auto;column-gap:.6rem;row-gap:.1rem;align-items:center;align-content:center;max-width:none;line-height:1.4}.date-box .date-actions{display:contents}.date-box #feedback-button{grid-column:1;grid-row:1/3;margin-right:.45rem;align-self:center}.date-box #today-date{grid-column:2;grid-row:1;white-space:nowrap}.date-box #timezone-label{grid-column:3;grid-row:1;font-size:.72rem;color:inherit;margin:0}.date-box #save-status{grid-column:2/4;grid-row:2;margin:0;line-height:1.35;max-width:23rem}.date-box #timezone-label,.date-box #save-status{display:block}
+@media(max-width:850px){.topbar .date-box{grid-template-columns:minmax(0,1fr) auto;width:100%;justify-self:stretch;row-gap:.25rem}.date-box #today-date{grid-column:1;justify-self:start;white-space:normal}.date-box #timezone-label{grid-column:2}.date-box #save-status{grid-column:1/3;justify-self:start;text-align:left;max-width:none}.date-box #feedback-button{grid-column:1/3;grid-row:3;justify-self:start;margin:.35rem 0 0}}
+
+.date-box #timezone-label::before{content:"(";font-size:1.15em}.date-box #timezone-label::after{content:")";font-size:1.15em}
+
+@media(max-width:850px){.topbar{grid-template-columns:minmax(0,1fr)}.topbar>div,.topbar .date-box{min-width:0;max-width:100%}.date-box #feedback-button{max-width:100%;white-space:normal;overflow-wrap:anywhere}.date-box #today-date{overflow-wrap:anywhere}}
+@media(max-width:600px){.daily-balances .inventory-grid{grid-template-columns:minmax(0,1fr)}.daily-balances #inventory-fields label{white-space:normal;overflow-wrap:anywhere;min-width:0}}

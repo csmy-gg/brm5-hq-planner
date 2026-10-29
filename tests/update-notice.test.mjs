@@ -10,10 +10,10 @@ test('existing 1.1 users see scheduling notice once; new visitors and ordinary l
  assert.equal(consumeUpdateNotice({...options,version:'1.2.1',existing:true}),false);
 });
 test('update-button intent survives reload and is consumed only by the matching build',()=>{
- const local=storage(),session=storage();rememberUpdateIntent(session,{id:'new',version:'1.2.1'});
- assert.equal(consumeUpdateNotice({version:'1.2.1',current:'old',local,session,existing:true}),false);assert(session.getItem(UPDATE_INTENT_KEY));
- assert.equal(consumeUpdateNotice({version:'1.2.1',current:'new',local,session,existing:true}),false);assert.equal(session.getItem(UPDATE_INTENT_KEY),null);
- assert.equal(consumeUpdateNotice({version:'1.2.1',current:'new',local,session,existing:true}),false);
+ const local=storage(),session=storage();rememberUpdateIntent(session,{id:'new',version:'1.3.0'});
+ assert.equal(consumeUpdateNotice({version:'1.3.0',current:'old',local,session,existing:true}),false);assert(session.getItem(UPDATE_INTENT_KEY));
+ assert.equal(consumeUpdateNotice({version:'1.3.0',current:'new',local,session,existing:true}),true);assert.equal(session.getItem(UPDATE_INTENT_KEY),null);
+ assert.equal(consumeUpdateNotice({version:'1.3.0',current:'new',local,session,existing:true}),false);
 });
 test('unavailable or malformed notice storage never prevents loading or updating',()=>{
  const broken={getItem(){throw Error('blocked');},setItem(){throw Error('blocked');},removeItem(){throw Error('blocked');}};
@@ -24,3 +24,5 @@ test('new users completing setup on 1.2 do not receive the legacy migration noti
  assert.equal(consumeUpdateNotice({...options,existing:false,settled:true}),false);
  assert.equal(consumeUpdateNotice({...options,existing:true}),false);
 });
+
+test('small releases stay quiet even after an explicit update click',()=>{const local=storage(),session=storage();rememberUpdateIntent(session,{id:'patch',version:'1.2.1'});assert.equal(consumeUpdateNotice({version:'1.2.1',current:'patch',local,session,existing:true}),false);assert.equal(session.getItem(UPDATE_INTENT_KEY),null);});

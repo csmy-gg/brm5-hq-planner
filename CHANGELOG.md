@@ -4,6 +4,18 @@ Short release notes for BRM5 HQ Planner, newest first. The version shown in the 
 
 Version numbers describe the size of an update: **major.minor.patch**. The first number is a large app, code or UI overhaul; the second is a noticeable user-experience improvement; the third is a small fix or subtle change. Increasing a higher number resets the lower numbers to zero.
 
+## 🎃 [1.3.0] — 2026-10-30 🎃
+
+- Added editable resource tiles and Save current stock directly to the daily overview.
+
+- Added a focused Easy-mode daily view with balances, next actions and upcoming deadlines.
+- Added shared background forecast calculation to keep the interface responsive without reducing planning checks.
+- Clarified check-in staffing comparisons and standardized research durations.
+- Improved mobile cards, department editing and access to recent changes.
+- Added a Halloween color theme with a matching sidebar, forms and dialogs.
+- Added an optional Halloween invitation for 30 October–1 November, with automatic restoration of the previous theme on 2 November (Europe/Prague).
+- Added a collapsed Seasonal Themes section in Appearance for year-round manual selection.
+
 ## [1.2.2] — 2026-10-28
 
 - Corrected Machining IV research cost from $16,000 to $15,000.

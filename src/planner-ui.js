@@ -1,3 +1,4 @@
+import {installSeasonal,HALLOWEEN_END} from './seasonal.js';
 import {readPreferences,savePreferences,applyPreferences,preferenceDefaults,PREFERENCES_KEY} from './preferences.js';
 import {createTimezonePicker} from './timezone-picker.js';
 import {validTimezone} from './time.js';
@@ -16,7 +17,7 @@ export function createPlannerUI({getState,persistence,commit,adopt,onPreferences
   document.body.append(drawer);
   trapFocus(drawer);
   const workspaceTools=$('.side-bottom');workspaceTools.className='workspace-tools';$('#drawer-workspace').append(workspaceTools);const importControl=workspaceTools.querySelector('label.import');importControl.tabIndex=0;importControl.setAttribute('role','button');importControl.onkeydown=event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();$('#import').click();}};
-  const theme=$('.theme-picker');$('#drawer-theme').append(theme);theme.querySelector('select').innerHTML='<option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option><option value="blueprint">Blueprint</option><option value="contrast">High contrast</option>';
+  const theme=$('.theme-picker');$('#drawer-theme').append(theme);theme.querySelector('select').innerHTML='<option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option><option value="blueprint">Blueprint</option><option value="contrast">High contrast</option><option value="halloween" hidden>Halloween (seasonal)</option>';
   const settings=$('#settings');$('#drawer-planning').append(settings);settings.classList.remove('panel');settings.querySelector('button[type="submit"]').hidden=true;
   for(const id of ['anchor','interval','visitMinutes','timezone']){const input=$('#'+id);input.setAttribute('form','settings');$('#drawer-schedule-fields').append(input.closest('label'));}
   const scheduleControls=createScheduleControls($('#drawer-schedule-fields'),{getState,onEdit:()=>message('Unsaved changes.')});
@@ -29,6 +30,7 @@ export function createPlannerUI({getState,persistence,commit,adopt,onPreferences
   }
   for(const [selector,label] of [['#sale','Send or manage deliveries'],['#start-research','Record a research start']]){const content=$(selector),details=document.createElement('details');details.className='easy-details contextual-controls';const summary=document.createElement('summary');summary.textContent=label;content.before(details);details.append(summary,content);disclosures.push(details);}
   const fields=()=>Object.fromEntries([...settings.elements].filter(el=>el.id).map(el=>[el.id,el.type==='checkbox'?el.checked:el.value]));
+  const seasonalChoices=document.createElement('details');seasonalChoices.className='seasonal-choices';seasonalChoices.innerHTML='<summary>Seasonal Themes</summary><p>Halloween uses charcoal backgrounds, muted purple panels and warm orange accents.</p><p id="seasonal-expiry-note"></p><button type="button" class="secondary" id="preview-halloween">Preview Halloween</button>';$('#drawer-theme').append(seasonalChoices);$('#preview-halloween').onclick=()=>{$('#theme').value='halloween';apply(fieldPreferences());message('Halloween preview. Save settings to keep it.');};
   function fieldPreferences(){return {...preferences,mode:$('#ui-mode').value,theme:$('#theme').value,layout:$('#ui-layout').value,textSize:Number($('#ui-text-size').value),motion:$('#ui-motion').value,largeControls:$('#ui-large-controls').checked};}
   function fillPreferences(value){$('#ui-mode').value=value.mode;$('#theme').value=value.theme;$('#ui-layout').value=value.layout;$('#ui-text-size').value=value.textSize;$('#ui-motion').value=value.motion;$('#ui-large-controls').checked=value.largeControls;}
   function message(text,error=false){const el=$('#settings-message');el.textContent=text;el.setAttribute('role',error?'alert':'status');el.classList.toggle('error',error);}
@@ -36,7 +38,7 @@ export function createPlannerUI({getState,persistence,commit,adopt,onPreferences
   function apply(value){applyPreferences(value);if(lastMode!==value.mode){disclosures.forEach(el=>el.open=value.mode==='advanced');lastMode=value.mode;}onPreferences(value);}
   function selectGroup(group){drawer.querySelectorAll('[data-settings-panel]').forEach(el=>el.hidden=Number(el.dataset.settingsPanel)!==group);drawer.querySelectorAll('[data-settings-group]').forEach(el=>el.setAttribute('aria-pressed',String(Number(el.dataset.settingsGroup)===group)));}
   function fillHQ(){const s=getState();for(const id of ['power','reserve','uptime','capacity','anchor','interval','visitMinutes','productionBuffer','timezone'])$('#'+id).value=s[id];$('#auto-capacity').checked=s.autoCapacity;$('#capacity').disabled=s.autoCapacity;timezone.sync();scheduleControls.fill(s);}
-  function open(group=0,element=null){if(drawer.open){selectGroup(group);return;}trigger=element||document.activeElement;fillPreferences(preferences);fillHQ();base=structuredClone(preferences);baseFields=fields();$('#settings-unsaved').hidden=true;message('');selectGroup(group);drawer.showModal();$('#close-settings').focus();syncStatus();}
+  function open(group=0,element=null){if(drawer.open){selectGroup(group);return;}trigger=element||document.activeElement;preferences=readPreferences();$('#seasonal-expiry-note').textContent=Date.now()<HALLOWEEN_END?'Returns to your previous theme on 2 November 2026 at 00:00 CET.':'Available year-round. Choose another theme whenever you like.';fillPreferences(preferences);fillHQ();base=structuredClone(preferences);baseFields=fields();$('#settings-unsaved').hidden=true;message('');selectGroup(group);drawer.showModal();$('#close-settings').focus();syncStatus();}
   function close(){if(dirty()){$('#settings-unsaved').hidden=false;$('#settings-keep').focus();return;}drawer.close();}
   function discard(){apply(base||preferences);preferences=base||preferences;fillPreferences(preferences);drawer.close();}
   function save(closeAfter=false){try{
@@ -84,5 +86,6 @@ export function createPlannerUI({getState,persistence,commit,adopt,onPreferences
   window.addEventListener('hashchange',()=>{if(location.hash==='#settings')open(3);});if(location.hash==='#settings')queueMicrotask(()=>open(3));
   window.addEventListener('storage',event=>{if(event.key===PREFERENCES_KEY&&!drawer.open){preferences=readPreferences();apply(preferences);}});
   apply(preferences);
+  installSeasonal({getPreferences:()=>preferences,selectTheme:theme=>{preferences=savePreferences({...preferences,theme});apply(preferences);},refresh:()=>{const current=readPreferences();if(!drawer.open&&JSON.stringify(current)!==JSON.stringify(preferences)){preferences=current;applyPreferences(preferences);}else if(drawer.open)applyPreferences(fieldPreferences());},isEditing:()=>drawer.open||Boolean(document.querySelector('dialog[open]'))||hasDrafts()});
   return {sync,syncStatus,open,identityChanged(){if(resetDialog.open)resetDialog.close();if(drawer.open){apply(preferences);base=null;drawer.close();}clearDrafts('settings');},existingAccount(profile){if(!preferences.modeChosen&&profile.setupComplete){preferences=savePreferences({...preferences,mode:'advanced',layout:'cards',filter:'all',modeChosen:true});apply(preferences);}},get preferences(){return preferences;},get editing(){return drawer.open;},get dirty(){return dirty();},saveResearch(values){preferences=savePreferences({...preferences,...values});applyPreferences(preferences);},discardSettings:discard};
 }

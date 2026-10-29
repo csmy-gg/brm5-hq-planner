@@ -26,3 +26,5 @@ test('version comparison is numeric across all three update sizes',()=>{
  assert.equal(compareVersions('1.10.0','1.2.9'),1);assert.equal(compareVersions('2.0.0','1.99.99'),1);assert.equal(compareVersions('1.1.1','1.1.0'),1);assert.equal(compareVersions('1.1.0','1.1.0'),0);
  for(const invalid of ['1.1','v1.1.0','01.1.0','1.1.0-beta','<script>'])assert.throws(()=>compareVersions(invalid,'1.1.0'));
 });
+
+test('pumpkin-decorated Halloween headings retain release validation',()=>{const decorated=notes.replace('## [1.1.0] — 2026-10-22','## 🎃 [1.1.0] — 2026-10-22 🎃');assert.equal(validateRelease(pkg,lock,decorated),'1.1.0');});

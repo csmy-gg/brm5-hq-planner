@@ -1,6 +1,7 @@
 // Pure planning decisions. Only the forecast applies these to a disposable copy of the HQ.
 export const PLANNING_POLICIES=['critical','packing','duration','unlocks','legacy'];
 export function researchPlanner(tasks,ids){
+ const childCounts=new Map(tasks.map(t=>[t.id,0]));for(const task of tasks)for(const parent of task.deps)childCounts.set(parent,(childCounts.get(parent)||0)+1);
  const byId=new Map(tasks.map(t=>[t.id,t])),children=new Map(tasks.map(t=>[t.id,[]]));
  for(const task of tasks)if(ids.has(task.id))for(const parent of task.deps)children.get(parent)?.push(task.id);
  function ranks(state,now){
@@ -16,7 +17,7 @@ export function researchPlanner(tasks,ids){
   // Instant research can release its power before any positive-duration starts.
   if((a.hours===0)!==(b.hours===0))return a.hours===0?-1:1;
   if(policy==='duration')return b.hours-a.hours||rank.get(b.id).hours-rank.get(a.id).hours||a.cost-b.cost||a.id-b.id;
-  if(policy==='legacy')return tasks.filter(t=>t.deps.includes(b.id)).length-tasks.filter(t=>t.deps.includes(a.id)).length||a.cost-b.cost||a.id-b.id;
+  if(policy==='legacy')return childCounts.get(b.id)-childCounts.get(a.id)||a.cost-b.cost||a.id-b.id;
   if(policy==='unlocks')return rank.get(b.id).children-rank.get(a.id).children||a.cost-b.cost||b.hours-a.hours||a.id-b.id;
   return rank.get(b.id).hours-rank.get(a.id).hours||b.hours-a.hours||rank.get(b.id).children-rank.get(a.id).children||a.cost-b.cost||a.id-b.id;
  });}

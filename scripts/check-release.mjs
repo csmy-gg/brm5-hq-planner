@@ -12,7 +12,8 @@ export function compareVersions(a,b){
 export function validateRelease(pkg,lock,changelog,{baseVersion,appChanged=false}={}){
  const version=pkg.version;compareVersions(version,version);
  if(lock.version!==version||lock.packages?.['']?.version!==version)throw Error('Package and lockfile app versions must match.');
- const entries=[...changelog.matchAll(/^## \[([^\]]+)\] — (\d{4}-\d{2}-\d{2})\r?\n([\s\S]*?)(?=^## |$(?![\s\S]))/gm)];
+ const normalized=changelog.replace(/^## 🎃 (\[[^\]\r\n]+\] — \d{4}-\d{2}-\d{2}) 🎃(?=\r?$)/gm,'## $1');
+ const entries=[...normalized.matchAll(/^## \[([^\]]+)\] — (\d{4}-\d{2}-\d{2})\r?\n([\s\S]*?)(?=^## |$(?![\s\S]))/gm)];
  if(entries[0]?.[1]!==version)throw Error('Prepend a dated changelog entry for app version '+version+'.');
  const seen=new Set();
  for(const [index,[,v,date,body]] of entries.entries()){

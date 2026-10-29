@@ -5,8 +5,8 @@ export function consumeUpdateNotice({version,current,existing,local,session,sett
  let intent=null,seen=null;
  try{const raw=session?.getItem(UPDATE_INTENT_KEY);intent=raw?JSON.parse(raw):null;}catch{}
  try{seen=local?.getItem(UPDATE_NOTICE_KEY);}catch{}
- const clicked=intent?.id===current;
- if(version!=='1.2.0'){if(clicked)try{session?.removeItem(UPDATE_INTENT_KEY);}catch{}return false;}
+ const announced=['1.2.0','1.3.0'].includes(version);const clicked=announced&&intent?.id===current;
+ if(!announced){if(intent?.id===current)try{session?.removeItem(UPDATE_INTENT_KEY);}catch{}return false;}
  // 1.1.0 did not record update clicks. Existing HQs get this release's notice
  // once on arrival; later refreshes require an explicit update intent.
  const firstSchedulingRelease=version==='1.2.0'&&existing&&seen!==version;
@@ -23,10 +23,10 @@ export function installUpdateNotice({version,current,document:doc=globalThis.doc
   if(!consumeUpdateNotice({version,current,existing:profile.setupComplete,local,session,settled}))return;
   displayed=true;
   const bubble=doc.createElement('aside');bubble.className='update-notice';bubble.setAttribute('aria-label','Website updated');
-  const scheduling=version==='1.2.0';
-  bubble.innerHTML=`<div class="update-notice-header"><strong>${scheduling?'More flexible visit schedules':'Website updated'}</strong><button type="button" class="ghost" aria-label="Dismiss update message">×</button></div><p role="status">${scheduling?'Scheduling has been updated. Choose specific daily times, such as 14:00 and 20:00, in Settings → Schedule.':'Your website update is ready. See what changed in the update log.'}</p><div class="update-notice-actions">${scheduling?'<button type="button" class="secondary" data-open-schedule>Check Schedule settings</button>':''}<a class="button ghost" href="https://github.com/csmy-gg/brm5-hq-planner/blob/main/CHANGELOG.md" target="_blank" rel="noopener noreferrer">Full Update Log</a></div>`;
+  const scheduling=version==='1.2.0',daily=version==='1.3.0';
+  bubble.innerHTML=`<div class="update-notice-header"><strong>${scheduling?'More flexible visit schedules':daily?'A clearer daily view':'Website updated'}</strong><button type="button" class="ghost" aria-label="Dismiss update message">×</button></div><p role="status">${scheduling?'Scheduling has been updated. Choose specific daily times, such as 14:00 and 20:00, in Settings → Schedule.':daily?'Try the focused Easy mode, faster planning and optional Halloween colors in Appearance settings.':'Your website update is ready. See what changed in the update log.'}</p><div class="update-notice-actions">${(scheduling||daily)?'<button type="button" class="secondary" data-open-schedule>Open settings</button>':''}<a class="button ghost" href="https://github.com/csmy-gg/brm5-hq-planner/blob/main/CHANGELOG.md" target="_blank" rel="noopener noreferrer">Full Update Log</a></div>`;
   bubble.querySelector('[aria-label="Dismiss update message"]').onclick=()=>bubble.remove();
-  const settings=bubble.querySelector('[data-open-schedule]');if(settings)settings.onclick=()=>{bubble.remove();onSettings();};
+  const settings=bubble.querySelector('[data-open-schedule]');if(settings)settings.onclick=()=>{bubble.remove();onSettings(daily?0:2);};
   doc.body.append(bubble);
  }};
 }
