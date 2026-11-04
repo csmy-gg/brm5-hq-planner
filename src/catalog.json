@@ -1215,13 +1215,13 @@
     {
       "name": "Environmental Hardening II",
       "res": [
-        6,
-        0,
-        12,
-        8
+        58,
+        18,
+        60,
+        20
       ],
       "cost": 17500,
-      "power": 45,
+      "power": 175,
       "hours": 16,
       "category": "Manufacturing",
       "prerequisites": [
