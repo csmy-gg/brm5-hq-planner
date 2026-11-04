@@ -796,14 +796,14 @@
     {
       "name": "Machining IV",
       "res": [
-        0,
-        0,
-        0,
-        0
+        10,
+        10,
+        12,
+        12
       ],
-      "cost": 15000,
-      "power": 55,
-      "hours": 4,
+      "cost": 17000,
+      "power": 200,
+      "hours": 10.5,
       "category": "Manufacturing",
       "prerequisites": [
         "Machining III"

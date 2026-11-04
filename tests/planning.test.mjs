@@ -9,7 +9,7 @@ import {plannedStartText,plannedDeliveryText} from '../src/forecast-ui.js';
 const now=Date.UTC(2026,9,20,10),hour=3600000;
 function profile(goal='139'){
  const s=createEmptyProfile(DATA.tasks,{now,timezone:'Europe/Prague'});
- Object.assign(s,{goal,cash:100000,power:191,capacity:500,autoCapacity:false,setupComplete:true,anchor:'2026-10-20T12:00'});
+ Object.assign(s,{goal,cash:100000,power:200,capacity:500,autoCapacity:false,setupComplete:true,anchor:'2026-10-20T12:00'});
  s.session.scheduled=now;s.staff.Operations={'S++':8};s.staff.Delivery={'S++':6};s.staff.Logistics={'S++':8,'S+':1};return s;
 }
 test('zero-stock Cobra completes without the old CM target deadlock',()=>{
@@ -22,7 +22,7 @@ test('one worker can fill the final two storage slots instead of being rounded d
 test('goal-specific scheduling starts the long Skirmisher prerequisite early',()=>{
  const s=profile('139'),required=goalIds(s,DATA.tasks),pending=[5,156,159,1,22,8,158,17,139];
  for(const t of DATA.tasks)s.status[t.id]={state:required.has(t.id)?'done':'todo'};for(const id of pending)s.status[id]={state:'todo'};s.res=[4,0,0,12];
- const plan=forecast(s,DATA,now);assert(plan.finished);assert(plan.rows[0].starts.includes(5));assert(plan.finish-now<=24*hour+60000);assertForecastValid(s,plan);
+ const plan=forecast(s,DATA,now);assert(plan.finished);assert(plan.rows[0].starts.includes(5));assert(plan.finish-now<=48*hour+60000);assertForecastValid(s,plan);
 });
 test('short prerequisite chains run in the same visit without skipping a dependency',()=>{
  const s=profile('110');s.res=[50,0,65,15];const plan=forecast(s,DATA,now);
