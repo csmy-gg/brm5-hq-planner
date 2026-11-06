@@ -56,4 +56,4 @@
 
 .catalog-prerequisites ul{padding-left:0;list-style:none;font-size:0.75rem;max-height:260px;overflow:auto;margin-top:10px}.catalog-prerequisites li{padding:4px 0;color:var(--muted)}.catalog-prerequisites .requirement-done{color:var(--accent)}.wiki-card .notice{font-size:0.75rem;margin-top:12px}
 
-.extra-checkin-action{display:flex;flex-direction:column;gap:6px;align-items:flex-start}.extra-checkin-action:has(button[hidden]){display:none}
+.hero-copy .extra-checkin-note{font-size:.8rem;margin:0 0 12px;max-width:none}.hero-copy:has(#extra-checkin[hidden]) .extra-checkin-note{display:none}.hero-actions{align-items:stretch}.hero-actions>.button,.hero-actions>button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;box-sizing:border-box}
