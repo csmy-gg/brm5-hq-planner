@@ -34,6 +34,11 @@ export function applySessionAction(state,action,data,now=Date.now()){
    else if(action.kind==='research'&&next.status[action.id]?.state==='active')next.status[action.id].end=end;
    else throw Error('This research is no longer active.');break;
   }
+  case 'finish-extra':
+   if(!action.token||typeof action.token!=='string')throw Error('An extra check-in needs its completion token.');
+   if(next.session?.scheduled!==action.scheduled)throw Error('The scheduled session changed. Review the current session.');
+   if(!Number.isFinite(action.openedAt)||action.openedAt>=action.scheduled||action.openedAt>now||next.setupComplete!==true)throw Error('This extra check-in is not valid.');
+   break;
   case 'finish':next=finishSession(next,action.scheduled,now);break;
   default:throw Error('Unknown session action.');
  }

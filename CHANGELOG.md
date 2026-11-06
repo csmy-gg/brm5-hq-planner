@@ -4,6 +4,12 @@ Short release notes for BRM5 HQ Planner, newest first. The version shown in the 
 
 Version numbers describe the size of an update: **major.minor.patch**. The first number is a large app, code or UI overhaul; the second is a noticeable user-experience improvement; the third is a small fix or subtle change. Increasing a higher number resets the lower numbers to zero.
 
+## [1.4.0] — 2026-11-06
+
+- Added extra check-ins before a scheduled visit without moving that visit.
+- Plan extra-visit research, deliveries and staffing using the actual time until the scheduled check-in.
+- Protect extra completion and recorded actions against duplicate submissions.
+
 ## 🎃 [1.3.0] — 2026-10-30 🎃
 
 - Added editable resource tiles and Save current stock directly to the daily overview.

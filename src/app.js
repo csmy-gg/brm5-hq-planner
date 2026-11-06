@@ -55,8 +55,8 @@ const forecastController=createForecastController({data:DATA,onChange:view=>{
  planStatus.textContent=view.pending?'Updating plan…':view.error?'Could not update the plan. Your recorded HQ is safe.':'';
  if(!view.pending&&!view.error){if(!editing())render();else document.documentElement.dataset.planDeferred='true';}
 }});
-function requestForecast(){return forecastController.request(state,Date.now(),persistence.user?.id||'guest').catch(error=>{planStatus.textContent='Could not update the plan. '+error.message;return null;});}
-async function currentForecast(){const revision=state.revision,result=await requestForecast();if(!result||revision!==state.revision)throw Error('Your HQ changed while the plan was updating. Open the check-in again.');return result;}
+function requestForecast(visit=workspace?.forecastContext??null){return forecastController.request(state,Date.now(),persistence.user?.id||'guest',visit).catch(error=>{planStatus.textContent='Could not update the plan. '+error.message;return null;});}
+async function currentForecast(visit=null){const revision=state.revision,result=await requestForecast(visit);if(!result||revision!==state.revision)throw Error('Your HQ changed while the plan was updating. Open the check-in again.');return result;}
 function describeAction(next,message){
  if(message?.startsWith('Restored the state before:')||message?.startsWith('Session:')||message?.startsWith('Session finished:'))return message;
  const tasks=tasksFor(state,DATA),started=tasks.filter(t=>state.status[t.id].state==='todo'&&next.status[t.id].state==='active'),completed=tasks.filter(t=>state.status[t.id].state!=='done'&&next.status[t.id].state==='done');
@@ -75,7 +75,7 @@ function commit(next,message){
 function act(fn,msg){try{return commit(fn(),msg);}catch(e){if(submittingForm)dirtyForms.add(submittingForm);toast(e.message,true);}}
 function input(id){const raw=$('#'+id).value,n=Number(raw);if(raw.trim()===''||!Number.isFinite(n)||n<0)throw Error('Enter a valid nonnegative number.');return n;}
 function resourceText(res){return res.map((n,i)=>n?`${num(n)} ${['CM','PM','Fuel','E'][i]}`:'').filter(Boolean).join(' · ')||'No resources';}
-async function openFinishReview(scheduled,trigger,section){try{await workspace.open(scheduled,trigger,section);}catch(error){toast(error.message,true);}}
+async function openFinishReview(scheduled,trigger,section,extra=false){try{await workspace.open(scheduled,trigger,section,extra);}catch(error){toast(error.message,true);}}
 function updateVisitCountdowns(){
  const now=Date.now();$$('[data-visit-time]').forEach(el=>{const end=Number(el.dataset.visitTime);if(!el.dataset.visitTime){el.textContent='Complete setup to create a visit';return;}const difference=end-now;if(difference<=0){el.textContent=el.hasAttribute('data-reference-visit')&&difference<0?'Visit time passed':el.hasAttribute('data-current-session')?'Due now · awaiting confirmation':'Due now';return;}const total=Math.ceil(difference/60000),days=Math.floor(total/1440),hours=Math.floor(total%1440/60),minutes=total%60;el.textContent='In '+(days?days+'d ':'')+(hours||days?hours+'h ':'')+minutes+'m';});
 }
@@ -109,6 +109,7 @@ function render(){
  $('#session-status').textContent=nxt<=now?'Due · waiting for you to finish':'Scheduled · completion required';
  $('#finish-session').dataset.finishSession=nxt;
  $('#finish-session-top').dataset.finishSession=nxt;
+ $('#extra-checkin').hidden=!(state.setupComplete&&nxt>Date.now());
  $('#session-completion-note').textContent='Record what you did in the controls below, then mark this session finished. '+(lastSession?'Last confirmed '+date(lastSession.finishedAt,true)+'.':'The current session stays here until you confirm it.');
  $('#goal').innerHTML=`<option value="all">Complete all ${tasks.length} research items</option><option value="cash">Reach a cash balance</option><option value="resource">Build a resource stockpile</option>`+productGoals(tasks).map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');const legacyGoal=!['all','cash','resource',...productGoals(tasks).map(t=>String(t.id))].includes(state.goal);if(legacyGoal)$('#goal').insertAdjacentHTML('afterbegin',`<option value="${esc(state.goal)}" disabled hidden>Choose a product or goal</option>`);$('#legacy-goal-note').hidden=!legacyGoal;$('#goal').value=state.goal;$('#target-wrap').hidden=!['cash','resource'].includes(state.goal);$('#target').value=state.target;$('#goal-resource').innerHTML=LABELS.map((n,i)=>`<option value="${i}">${n}</option>`).join('');$('#goal-resource').value=state.goalResource;$('#goal-resource').hidden=state.goal!=='resource';
  const progress=goalProgress(state,tasks),goalName=state.goal==='all'?'All research':state.goal==='cash'?'Cash target':state.goal==='resource'?LABELS[state.goalResource]+' target':tasks.find(t=>String(t.id)===state.goal)?.name||'Research goal';
@@ -199,6 +200,7 @@ const anotherDelivery=document.createElement('button');anotherDelivery.type='but
 $('#goal').onchange=()=>act(()=>({...clone(state),goal:$('#goal').value}));$('#target').onchange=()=>act(()=>({...clone(state),target:input('target')}));$('#goal-resource').onchange=()=>act(()=>({...clone(state),goalResource:Number($('#goal-resource').value)}));
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||e.detail>1)return;
 if(b.hasAttribute('data-clear-research'))clearResearchFilters();
+if(b.id==='extra-checkin')openFinishReview(nextVisit(state),b,null,true);
 if(b.hasAttribute('data-finish-session'))openFinishReview(Number(b.dataset.finishSession),b);
 if(b.dataset.restoreHistory){const entry=state.history.find(x=>x.id===b.dataset.restoreHistory);if(entry)act(()=>restoreHistory(state,entry.id),'Restored the state before: '+entry.label);}
 if(b.hasAttribute('data-edit-research-time')){const panel=b.closest('.research-running-item');panel.querySelector('.research-timer-editor').hidden=false;b.setAttribute('aria-expanded','true');panel.querySelector('[data-research-hours]').focus();}

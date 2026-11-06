@@ -84,9 +84,9 @@ export function projectStock(s,until,m){
  return {res:s.res.map((n,i)=>n+gain[i]*factor),capped:total>free+1e-6,fullAt};
 }
 
-function simulateForecast(state,data,now,limit,policy,planner,tasks,m,ids){
+function simulateForecast(state,data,now,limit,policy,planner,tasks,m,ids,visit){
  const s=normalizeDeliveries(stateSnapshot(state),data.wiki),rows=[],scheduled=nextVisit(s);
- let occurrence={time:scheduled,warnings:[]};
+ let occurrence={time:visit?.mode==='extra'?now:scheduled,warnings:[]};
  const needed=()=>tasks.filter(task=>ids.has(task.id)&&s.status[task.id]?.state==='todo');
  const achieved=()=>s.goal==='cash'?s.cash>=s.target:s.goal==='resource'?s.res[s.goalResource]>=s.target:[...ids].every(id=>s.status[id]?.state==='done');
  if(achieved())return {rows,finished:true,finish:now,metrics:m,policy};
@@ -94,7 +94,7 @@ function simulateForecast(state,data,now,limit,policy,planner,tasks,m,ids){
  let finished=false,finish=null;
  for(let k=0;k<limit;k++){
   const scheduledTime=occurrence.time;if(scheduledTime===null)break;
-  const time=Math.max(scheduledTime,now,rows.at(-1)?.visitEnd??-Infinity),windowEnd=time+visitMinutes*60000;
+  const time=Math.max(scheduledTime,now,rows.at(-1)?.visitEnd??-Infinity),windowEnd=visit?.mode==='extra'&&k===0&&scheduled>time?Math.min(time+visitMinutes*60000,scheduled):time+visitMinutes*60000;
   if(!validTimestamp(time)||!validTimestamp(windowEnd+maxHours*3600000))break;
   const row={time,scheduledTime,scheduleWarnings:occurrence.warnings,visitMinutes,starts:[],completes:[],researchSteps:[],completionSteps:[],events:[],collected:0,sold:0,delivery:null,capped:false,storageFullAt:null};
   let at=time;
@@ -114,7 +114,7 @@ function simulateForecast(state,data,now,limit,policy,planner,tasks,m,ids){
    if(!upcoming.length)break;
    at=Math.min(...upcoming);
   }
-  occurrence=nextScheduledVisit(s,Math.max(scheduledTime,at),{previous:time});
+  occurrence=visit?.mode==='extra'&&k===0?{time:scheduled,warnings:[]}:nextScheduledVisit(s,Math.max(scheduledTime,at),{previous:time});
   if(!finished){
    const rank=planner.ranks(s,at),remaining=needed(),nextTime=occurrence.time??at;
    const capacity=freeDeliverySlots(s,data.wiki).reduce((n,worker)=>n+worker.capacity,0);
@@ -129,12 +129,13 @@ function simulateForecast(state,data,now,limit,policy,planner,tasks,m,ids){
  const targetProgress=s.goal==='cash'?s.cash:s.goal==='resource'?s.res[s.goalResource]:progress;
  return {rows,finished,finish,metrics:m,policy,progress:targetProgress};
 }
-export function forecast(state,data,now=Date.now(),limit=160){
+export function forecast(state,data,now=Date.now(),limit=160,visit=null){
+ if(visit&& (visit.mode!=='extra'||visit.scheduled!==nextVisit(state)))throw Error('The scheduled session changed. Review the current session.');
  const m=metrics(state,data.wiki);
  if(state.setupComplete===false||nextVisit(state)==null)return {rows:[],finished:false,finish:null,metrics:m,needsSetup:true};
  const tasks=tasksFor(state,data),ids=goalIds(state,tasks),planner=researchPlanner(tasks,ids);
  const policies=(state.goal==='cash'||state.goal==='resource')?['critical']:PLANNING_POLICIES;
- const results=policies.map(policy=>simulateForecast(state,data,now,limit,policy,planner,tasks,m,ids));
+ const results=policies.map(policy=>simulateForecast(state,data,now,limit,policy,planner,tasks,m,ids,visit));
  results.sort((a,b)=>Number(b.finished)-Number(a.finished)||(a.finished?a.finish-b.finish:(b.progress||0)-(a.progress||0))||a.rows.filter(row=>row.delivery).length-b.rows.filter(row=>row.delivery).length||a.rows.length-b.rows.length);
  return {...results[0],comparedPlans:results.length};
 }
