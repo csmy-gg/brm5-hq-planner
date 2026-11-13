@@ -887,14 +887,14 @@
     {
       "name": "Surface Conditioning III",
       "res": [
-        8,
+        26,
         18,
-        12,
-        25
+        30,
+        32
       ],
       "cost": 15000,
       "power": 145,
-      "hours": 8,
+      "hours": 18,
       "category": "Manufacturing",
       "prerequisites": [
         "Surface Conditioning II"
@@ -929,14 +929,14 @@
     {
       "name": "Chemical & Electrochemical Treatment III",
       "res": [
-        12,
+        32,
         8,
-        14,
+        55,
         40
       ],
       "cost": 22500,
-      "power": 160,
-      "hours": 2,
+      "power": 185,
+      "hours": 8.25,
       "category": "Manufacturing",
       "prerequisites": [
         "Chemical & Electrochemical Treatment II"
@@ -972,14 +972,14 @@
     {
       "name": "Cosmetic & Indicative Finishing III",
       "res": [
-        2,
-        0,
-        0,
-        4
+        35,
+        12,
+        52,
+        35
       ],
-      "cost": 5000,
-      "power": 15,
-      "hours": 6,
+      "cost": 4750,
+      "power": 110,
+      "hours": 0,
       "category": "Manufacturing",
       "prerequisites": [
         "Cosmetic & Indicative Finishing II"
@@ -1399,14 +1399,14 @@
     {
       "name": "Tolerance Control III",
       "res": [
-        0,
-        0,
-        0,
+        30,
+        42,
+        65,
         8
       ],
-      "cost": 4000,
-      "power": 55,
-      "hours": 12,
+      "cost": 12500,
+      "power": 160,
+      "hours": 8,
       "category": "Manufacturing",
       "prerequisites": [
         "Tolerance Control II"
@@ -1483,14 +1483,14 @@
     {
       "name": "Mechanical Joining III",
       "res": [
-        4,
-        0,
-        0,
-        12
+        45,
+        26,
+        60,
+        35
       ],
-      "cost": 15000,
-      "power": 40,
-      "hours": 18,
+      "cost": 14500,
+      "power": 180,
+      "hours": 6.25,
       "category": "Manufacturing",
       "prerequisites": [
         "Mechanical Joining II"
