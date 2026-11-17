@@ -56,7 +56,8 @@ export function productionPlan(state,remaining,metrics,wiki,rank,policy){
  if(state.goal==='resource')keep[state.goalResource]=state.target;
  const missing=focus.length?Math.min(...focus.map(t=>t.res.reduce((n,c,i)=>n+Math.max(0,c-state.res[i]),0))):state.goal==='resource'?Math.max(0,state.target-state.res[state.goalResource]):0;
  const researchStock=demand.map((n,i)=>Math.min(n,Math.max(largest[i],focus.reduce((sum,t)=>sum+t.res[i],0))));
- return {primary,secondary,keep,researchStock,cashNeed,spaceNeed:Math.max(0,state.res.reduce((a,b)=>a+b,0)-metrics.capacity+Math.min(missing,metrics.capacity))};
+ const recovery=state.goal!=='cash'&&state.goal!=='resource'&&state.res.reduce((a,b)=>a+b,0)>=metrics.capacity-1e-7&&metrics.ops>0&&state.uptime>0?frontier.filter(t=>t.deps.every(id=>state.status[id]?.state==='done')&&t.power<=state.power&&t.res.reduce((a,b)=>a+b,0)<=metrics.capacity&&t.res.some((n,i)=>n>state.res[i]+1e-7)).map(t=>({keep:t.res,space:t.res.reduce((n,c,i)=>n+Math.max(0,c-state.res[i]),0)})):[];
+ return {primary,secondary,keep,researchStock,cashNeed,recovery,spaceNeed:Math.max(0,state.res.reduce((a,b)=>a+b,0)-metrics.capacity+Math.min(missing,metrics.capacity))};
 }
 
 // Couple a Fuel sale to its replacement staffing. These are disposable forecast
@@ -107,7 +108,15 @@ export function chooseDelivery(state,plan,capacity,wiki){
   if(quantity>0)candidates.push({resource:i,quantity,value:quantity*price});
  }
  candidates.sort((a,b)=>plan.spaceNeed?(b.quantity-a.quantity||b.value-a.value):(b.value-a.value||a.quantity-b.quantity));
- return candidates[0]||null;
+ if(candidates.length)return candidates[0];
+ // Full storage can require protecting one reachable node rather than the whole chain.
+ // This is an explicit delivery suggestion; recorded stock is never changed here.
+ for(const target of plan.recovery||[]){
+  const options=state.res.map((stock,i)=>({resource:i,quantity:Math.min(Math.max(0,Math.floor(stock-target.keep[i]+1e-7)),capacity,Math.ceil(target.space))})).filter(x=>x.quantity>0);
+  options.sort((a,b)=>b.quantity-a.quantity||a.resource-b.resource);
+  if(options.length){const sale=options[0];return {...sale,value:sale.quantity*wiki.sellPrices[['cm','pm','fuel','equipment'][sale.resource]]};}
+ }
+ return null;
 }
 
 export function chooseAssignments(state,plan,metrics){
