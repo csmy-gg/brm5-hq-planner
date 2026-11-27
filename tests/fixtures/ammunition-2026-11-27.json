@@ -1,0 +1,41 @@
+[
+  {
+    "id": 144,
+    "name": "7.62x51mm NATO Linked Ammunition",
+    "cost": 8500,
+    "power": 140,
+    "res": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "hours": 0.016666666666666666
+  },
+  {
+    "id": 143,
+    "name": "12.7x99mm NATO Linked Ammunition",
+    "cost": 10000,
+    "power": 160,
+    "res": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "hours": 0.016666666666666666
+  },
+  {
+    "id": 142,
+    "name": "M151 HE Air-to-Ground Rockets",
+    "cost": 24500,
+    "power": 180,
+    "res": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "hours": 0.016666666666666666
+  }
+]

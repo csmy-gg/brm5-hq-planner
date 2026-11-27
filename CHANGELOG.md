@@ -4,6 +4,12 @@ Short release notes for BRM5 HQ Planner, newest first. The version shown in the 
 
 Version numbers describe the size of an update: **major.minor.patch**. The first number is a large app, code or UI overhaul; the second is a noticeable user-experience improvement; the third is a small fix or subtle change. Increasing a higher number resets the lower numbers to zero.
 
+## [1.4.2] — 2026-11-27
+
+- Adjusted 7.62x51mm NATO Linked Ammunition values after the in-game update: $8,500 research cost and 140% research power.
+- Adjusted 12.7x99mm NATO Linked Ammunition values after the in-game update: $10,000 research cost and 160% research power.
+- Adjusted M151 HE Air-to-Ground Rockets values after the in-game update: $24,500 research cost and 180% research power.
+
 ## [1.4.1] — 2026-11-17
 
 - Improved planning engine

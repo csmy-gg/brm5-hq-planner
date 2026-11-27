@@ -1917,8 +1917,8 @@
         0,
         0
       ],
-      "cost": 10000,
-      "power": 45,
+      "cost": 24500,
+      "power": 180,
       "hours": 0.016666666666666666,
       "category": "Products",
       "prerequisites": [
@@ -2096,8 +2096,8 @@
         0,
         0
       ],
-      "cost": 7500,
-      "power": 40,
+      "cost": 10000,
+      "power": 160,
       "hours": 0.016666666666666666,
       "category": "Products",
       "prerequisites": [
@@ -2275,8 +2275,8 @@
         0,
         0
       ],
-      "cost": 5000,
-      "power": 35,
+      "cost": 8500,
+      "power": 140,
       "hours": 0.016666666666666666,
       "category": "Products",
       "prerequisites": [
